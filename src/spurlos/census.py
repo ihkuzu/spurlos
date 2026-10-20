@@ -108,11 +108,11 @@ def format_report(census: Census, limit: int = 25) -> str:
             "likely forgotten accounts."
         ),
         "",
-        f"{'organisation':28} {'domain':26} {'mails':>5}  {'first':10}  {'last':10}  newsletter",
+        f"{'organisation':28} {'domain':30} {'mails':>5}  {'first':10}  {'last':10}  newsletter",
     ]
     for org in census.orgs[:limit]:
         lines.append(
-            f"{org.name[:28]:28} {org.domain[:26]:26} {org.messages:>5}  "
+            f"{org.name[:28]:28} {org.domain[:30]:30} {org.messages:>5}  "
             f"{_day(org.first_seen):10}  {_day(org.last_seen):10}  {org.newsletter_share:.0%}"
         )
     if len(census.orgs) > limit:

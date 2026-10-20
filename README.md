@@ -7,9 +7,9 @@ spurlos finds them, asks them what they store about you and gets it deleted unde
 It runs on your own machine: no account, no server, no third party that you have to hand
 your data to so that it can be deleted.
 
-> Status: early. Day 1 of the build is done: reading your mailbox and listing the
-> organisations that have your address. Requests, reply tracking and the agents follow,
-> see [Roadmap](#roadmap).
+> Status: early. Reading your mailbox, finding the organisations behind it, their privacy
+> contacts and what to do about each one works. Sending requests, tracking replies and the
+> agents follow, see [Roadmap](#roadmap).
 
 ## What it does today
 
@@ -21,14 +21,66 @@ $ spurlos census
 12 organisations have your email address (from 215 messages, 10 from private mailboxes left out).
 7 of them have not written for over two years: likely forgotten accounts.
 
-organisation                 domain                     mails  first       last        newsletter
-CodeCamp Online              codecamp.io                   28  2017-11-12  2020-10-13  75%
-Kartenhaus Games             kartenhaus-games.com          27  2014-10-25  2016-09-29  0%
-Apotheke Rosengarten         apotheke-rosengarten.de       24  2024-11-05  2026-09-27  0%
+organisation                 domain                         mails  first       last        newsletter
+CodeCamp Online              codecamp.example                  28  2017-11-12  2020-10-13  75%
+Kartenhaus Games             kartenhaus-games.example          27  2014-10-25  2016-09-29  0%
+Apotheke Rosengarten         apotheke-rosengarten.example      24  2024-11-05  2026-09-27  0%
+...
+
+$ spurlos triage
+12 organisations, 5 with a known privacy contact.
+priority: 7 high, 5 medium, 0 low
+
+[high  ] Kartenhaus Games (kartenhaus-games.example) - entertainment
+         erasure: forgotten account: account, password mails, none for 2+ years
+         contact: privacy@kartenhaus-games.example
+[high  ] Apotheke Rosengarten (apotheke-rosengarten.example) - health
+         access: may hold special category data (Art. 9); see what they keep first
+         contact: datenschutz@apotheke-rosengarten.example
 ...
 ```
 
-The demo mailbox is made up. Run it on your own mail to see your real number.
+The demo mailbox is made up and uses `.example` domains, so nothing in it can reach a real
+company. Run it on your own mail to see your real numbers.
+
+## How it decides
+
+For every organisation spurlos looks at three things:
+
+1. **Who they are.** The sender domain is looked up in the open
+   [Datenanfragen.de](https://www.datarequests.org) database: about 3,000 organisations with
+   their privacy contact, category and preferred way of contact, released under CC0. A copy
+   ships with spurlos, so lookups work offline. `mail.news.zalando.de` finds Zalando SE and
+   `datenschutz@zalando.de`.
+2. **What they likely hold.** Subject lines show whether there is more than an email address:
+   welcome and verification mails (an account), orders and invoices (name, address, payment),
+   password resets, contracts and bookings. Patterns cover German, English and Turkish.
+3. **What kind of organisation it is.** Taken from the database first, then from simple name
+   rules (Apotheke, Bank, Versicherung, ...). Only what is still unknown goes to a local model
+   with `--llm`, and its answer has to be one of a fixed list of categories.
+
+From that it suggests one action:
+
+| situation | action | priority |
+|---|---|---|
+| address dealers, ad networks, credit agencies | access + objection (Art. 15, 21) | high |
+| health, religion, politics (Art. 9 data) | access first | high |
+| account with no mail for two years | erasure (Art. 17) | high |
+| no mail for two years | erasure | medium |
+| active account, contract, bank, insurer | access | medium |
+| newsletter only | unsubscribe link | low |
+
+```
+spurlos triage                      # rules only, no model
+spurlos triage --llm                # ask a local Ollama model for unknown categories
+spurlos triage --llm --model qwen2.5:7b
+spurlos registry show dhl.de        # all matching records
+spurlos contact shop.de --email datenschutz@shop.de   # add a contact the database lacks
+spurlos registry update             # fetch the latest database from GitHub
+```
+
+The model runs through [Ollama](https://ollama.com) on your machine. A 3B model is enough for
+this; no subject line leaves your computer.
 
 ## Privacy by design
 
@@ -38,6 +90,8 @@ The demo mailbox is made up. Run it on your own mail to see your real number.
   A test checks exactly this.
 - **Local only.** Everything goes into one SQLite file, `~/.spurlos/vault.db`
   (or `$SPURLOS_HOME`), readable only by you. Nothing is uploaded anywhere.
+- **No data out.** The only network calls are to your own mail server, to a model on your
+  own machine and, if you ask for it, to GitHub to download the public contact database.
 - **Your own data only.** spurlos works on your own mailbox. It does not search for other
   people and will not send requests in anyone else's name.
 
@@ -84,8 +138,8 @@ left out of the list.
 ## Roadmap
 
 1. Read the mailbox and list the organisations (done)
-2. An open registry of companies and their privacy contacts, plus signals for real accounts
-   (welcome mails, orders, password resets) and a local model that sorts them into categories
+2. Privacy contacts from the open database, signals for real accounts and categories from
+   rules or a local model, plus a suggested action per organisation (done)
 3. GDPR requests: access (Art. 15), erasure (Art. 17) and objection (Art. 21) in German and
    English, from fixed legal templates, sent from your own address only after you confirm
 4. A reply agent that matches answers to requests and tells you what happened: confirmed,
@@ -99,6 +153,12 @@ left out of the list.
 
 spurlos helps you use rights the GDPR gives you. It is not a lawyer, and the letters it
 prepares are templates you check before you send them.
+
+## Credits
+
+Privacy contacts, supervisory authorities and request templates come from
+[datenanfragen/data](https://github.com/datenanfragen/data) (CC0 1.0). Missing or wrong
+records are best fixed there, so every tool that uses the database gets the fix.
 
 ## License
 

@@ -15,89 +15,98 @@ ME = "max.mustermann@example.org"
 COMPANIES = [
     (
         "Brotkorb Shop",
-        "bestellung@mail.brotkorb-shop.de",
+        "bestellung@mail.brotkorb-shop.example",
         ["Ihre Bestellung #{n}", "Ihre Lieferung kommt heute", "Neue Angebote für Sie"],
         True,
         (6, 0),
     ),
     (
         "Schienenwerk",
-        "noreply@schienenwerk.de",
+        "noreply@schienenwerk.example",
         ["Ihre Fahrkarte", "Buchungsbestätigung {n}", "Verspätung Ihrer Verbindung"],
         False,
         (5, 0),
     ),
     (
         "Kontora Bank",
-        "service@kontora-bank.de",
+        "service@kontora-bank.example",
         ["Neues Dokument in Ihrem Postfach", "Ihr Kontoauszug"],
         False,
         (4, 0),
     ),
     (
         "FitWerk Studios",
-        "info@fitwerk-studios.de",
+        "info@fitwerk-studios.example",
         ["Willkommen bei FitWerk", "Ihr Mitgliedsbeitrag", "Kurse diese Woche"],
         True,
         (7, 3),
     ),
     (
         "Pixelforum",
-        "notifications@pixelforum.net",
+        "notifications@pixelforum.example",
         ["Welcome to Pixelforum", "Someone replied to your post", "Weekly digest"],
         True,
         (11, 8),
     ),
     (
         "TravelNest",
-        "deals@news.travelnest.com",
+        "deals@news.travelnest.example",
         ["Your booking is confirmed", "Last chance: 30% off", "Rate your stay"],
         True,
         (6, 2),
     ),
     (
         "Stromfix",
-        "kundenservice@stromfix.de",
+        "kundenservice@stromfix.example",
         ["Ihre Jahresabrechnung", "Abschlag angepasst"],
         False,
         (3, 0),
     ),
     (
         "CodeCamp Online",
-        "hello@codecamp.io",
+        "hello@codecamp.example",
         ["Confirm your email", "Your certificate is ready", "New course: Python"],
         True,
         (9, 6),
     ),
     (
         "Mietradar",
-        "alerts@mietradar.de",
+        "alerts@mietradar.example",
         ["Neue Wohnungen in Erlangen", "Ihr Suchauftrag"],
         True,
         (4, 3),
     ),
     (
         "Lesefuchs",
-        "newsletter@lesefuchs.de",
+        "newsletter@lesefuchs.example",
         ["Buchtipps im {month}", "Ihre Bestellung wurde versendet"],
         True,
         (10, 1),
     ),
     (
         "Kartenhaus Games",
-        "no-reply@kartenhaus-games.com",
+        "no-reply@kartenhaus-games.example",
         ["Verify your account", "Password reset request"],
         False,
         (12, 10),
     ),
     (
         "Apotheke Rosengarten",
-        "shop@apotheke-rosengarten.de",
+        "shop@apotheke-rosengarten.example",
         ["Ihre Bestellung", "Ihr Rezept ist da"],
         False,
         (2, 0),
     ),
 ]
+
+# Privacy contacts for some of the made-up firms, as a user would add them.
+CONTACTS = {
+    "brotkorb-shop.example": "datenschutz@brotkorb-shop.example",
+    "kartenhaus-games.example": "privacy@kartenhaus-games.example",
+    "pixelforum.example": "privacy@pixelforum.example",
+    "apotheke-rosengarten.example": "datenschutz@apotheke-rosengarten.example",
+    "codecamp.example": "dpo@codecamp.example",
+}
 
 FRIENDS = ["anna.schmidt@gmail.com", "mehmet.yilmaz@web.de", "lukas.weber@gmx.de"]
 

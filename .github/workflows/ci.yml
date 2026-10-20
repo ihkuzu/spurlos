@@ -23,3 +23,5 @@ jobs:
       - run: pytest -q
       - run: spurlos --vault demo.db demo --path demo.mbox
       - run: spurlos --vault demo.db census
+      - run: spurlos --vault demo.db triage
+      - run: spurlos registry show zalando.de

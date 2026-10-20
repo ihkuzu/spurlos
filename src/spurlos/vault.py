@@ -24,6 +24,18 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 CREATE INDEX IF NOT EXISTS messages_org ON messages(org);
 CREATE TABLE IF NOT EXISTS me (address TEXT PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS contacts (
+    domain TEXT PRIMARY KEY,
+    email TEXT,
+    webform TEXT,
+    name TEXT
+);
+CREATE TABLE IF NOT EXISTS org_info (
+    domain TEXT PRIMARY KEY,
+    category TEXT NOT NULL,
+    source TEXT NOT NULL,
+    updated TEXT NOT NULL
+);
 """
 
 
@@ -81,6 +93,40 @@ class Vault:
 
     def messages(self) -> list[sqlite3.Row]:
         return self.db.execute("SELECT * FROM messages").fetchall()
+
+    def subjects(self, org: str, limit: int = 200) -> list[str]:
+        rows = self.db.execute(
+            "SELECT subject FROM messages WHERE org = ? ORDER BY date DESC LIMIT ?", (org, limit)
+        )
+        return [r[0] for r in rows]
+
+    def category(self, org: str) -> tuple[str, str] | None:
+        row = self.db.execute(
+            "SELECT category, source FROM org_info WHERE domain = ?", (org,)
+        ).fetchone()
+        return (row[0], row[1]) if row else None
+
+    def set_category(self, org: str, category: str, source: str) -> None:
+        self.db.execute(
+            "INSERT OR REPLACE INTO org_info VALUES (?,?,?,datetime('now'))",
+            (org, category, source),
+        )
+        self.db.commit()
+
+    def set_contact(
+        self,
+        org: str,
+        email: str | None = None,
+        webform: str | None = None,
+        name: str | None = None,
+    ) -> None:
+        self.db.execute(
+            "INSERT OR REPLACE INTO contacts VALUES (?,?,?,?)", (org, email, webform, name)
+        )
+        self.db.commit()
+
+    def contact(self, org: str) -> sqlite3.Row | None:
+        return self.db.execute("SELECT * FROM contacts WHERE domain = ?", (org,)).fetchone()
 
     def count(self) -> int:
         return self.db.execute("SELECT COUNT(*) FROM messages").fetchone()[0]

@@ -66,8 +66,14 @@ def org_domain(domain: str) -> str:
     """mail.news.zalando.de -> zalando.de, shop.amazon.co.uk -> amazon.co.uk."""
     domain = domain.lower().strip(".")
     parts = _extract(domain)
-    top = getattr(parts, "top_domain_under_public_suffix", None) or parts.registered_domain
-    return top or domain
+    if hasattr(parts, "top_domain_under_public_suffix"):
+        top = parts.top_domain_under_public_suffix
+    else:
+        top = parts.registered_domain
+    if top:
+        return top
+    # unknown endings such as .example or .local: keep the last two labels
+    return ".".join(domain.split(".")[-2:])
 
 
 def is_personal(domain: str) -> bool:
