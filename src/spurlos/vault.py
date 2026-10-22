@@ -36,6 +36,23 @@ CREATE TABLE IF NOT EXISTS org_info (
     source TEXT NOT NULL,
     updated TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS profile (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS requests (
+    id TEXT PRIMARY KEY,
+    org TEXT NOT NULL,
+    record TEXT,
+    kind TEXT NOT NULL,
+    lang TEXT NOT NULL,
+    recipient TEXT NOT NULL,
+    transport TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    body TEXT NOT NULL,
+    status TEXT NOT NULL,
+    created TEXT NOT NULL,
+    sent TEXT,
+    due TEXT,
+    message_id TEXT
+);
 """
 
 
@@ -127,6 +144,58 @@ class Vault:
 
     def contact(self, org: str) -> sqlite3.Row | None:
         return self.db.execute("SELECT * FROM contacts WHERE domain = ?", (org,)).fetchone()
+
+    def profile(self) -> dict[str, str]:
+        return dict(self.db.execute("SELECT key, value FROM profile").fetchall())
+
+    def set_profile(self, **values: str | None) -> None:
+        for key, value in values.items():
+            if value:
+                self.db.execute("INSERT OR REPLACE INTO profile VALUES (?,?)", (key, value))
+        self.db.commit()
+
+    def add_request(self, d) -> None:
+        self.db.execute(
+            "INSERT INTO requests (id, org, record, kind, lang, recipient, transport, subject,"
+            " body, status, created) VALUES (?,?,?,?,?,?,?,?,?,'draft',datetime('now'))",
+            (d.id, d.org, d.record, d.kind, d.lang, d.recipient, d.transport, d.subject, d.body),
+        )
+        self.db.commit()
+
+    def request(self, request_id: str) -> sqlite3.Row | None:
+        return self.db.execute(
+            "SELECT * FROM requests WHERE id = ?", (request_id.upper(),)
+        ).fetchone()
+
+    def requests(self, status: str | None = None) -> list[sqlite3.Row]:
+        if status:
+            rows = self.db.execute(
+                "SELECT * FROM requests WHERE status = ? ORDER BY created", (status,)
+            )
+        else:
+            rows = self.db.execute("SELECT * FROM requests ORDER BY created")
+        return rows.fetchall()
+
+    def open_request(self, org: str, kind: str) -> sqlite3.Row | None:
+        """A draft or sent request of this kind that has no answer yet."""
+        return self.db.execute(
+            "SELECT * FROM requests WHERE org = ? AND kind = ? AND status IN ('draft', 'sent')",
+            (org, kind),
+        ).fetchone()
+
+    def mark_sent(self, request_id: str, sent: str, due: str, message_id: str | None) -> None:
+        self.db.execute(
+            "UPDATE requests SET status = 'sent', sent = ?, due = ?, message_id = ? WHERE id = ?",
+            (sent, due, message_id, request_id.upper()),
+        )
+        self.db.commit()
+
+    def delete_draft(self, request_id: str) -> bool:
+        cur = self.db.execute(
+            "DELETE FROM requests WHERE id = ? AND status = 'draft'", (request_id.upper(),)
+        )
+        self.db.commit()
+        return bool(cur.rowcount)
 
     def count(self) -> int:
         return self.db.execute("SELECT COUNT(*) FROM messages").fetchone()[0]

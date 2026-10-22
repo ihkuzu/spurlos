@@ -7,9 +7,9 @@ spurlos finds them, asks them what they store about you and gets it deleted unde
 It runs on your own machine: no account, no server, no third party that you have to hand
 your data to so that it can be deleted.
 
-> Status: early. Reading your mailbox, finding the organisations behind it, their privacy
-> contacts and what to do about each one works. Sending requests, tracking replies and the
-> agents follow, see [Roadmap](#roadmap).
+> Status: early. Reading your mailbox, finding the organisations behind it and their privacy
+> contacts, deciding what to do and sending GDPR requests with deadline tracking works.
+> Reading the replies with an agent and escalating follow, see [Roadmap](#roadmap).
 
 ## What it does today
 
@@ -82,6 +82,39 @@ spurlos registry update             # fetch the latest database from GitHub
 The model runs through [Ollama](https://ollama.com) on your machine. A 3B model is enough for
 this; no subject line leaves your computer.
 
+## Sending requests
+
+```
+spurlos profile --name "Max Mustermann" --email max@gmail.com
+spurlos request new zalando.de --kind access          # one draft
+spurlos request batch --priority high                 # drafts for every high item in triage
+spurlos request send SP-7K2Q9M                        # shows the mail, asks, then sends
+spurlos request list
+```
+
+```
+SP-XQMLU3  erasure   kartenhaus-games.example       email   draft
+SP-KN3KEZ  erasure   codecamp.example               email   sent 2026-09-01, OVERDUE by 21 days
+SP-F874UW  access    apotheke-rosengarten.example   email   draft
+```
+
+- **The letters are fixed legal text, not generated.** They are the access (Art. 15), erasure
+  (Art. 17) and objection (Art. 21) templates of Datenanfragen.de, in German or English
+  depending on the company. No model writes or changes them.
+- **Only the data needed to find you.** Name, email and a reference number. Your postal
+  address is added only for companies whose record says they need it.
+- **Nothing is sent without you.** `send` prints the full mail and waits for you to type
+  `yes`. It goes out from your own address over your provider's SMTP, with a copy to yourself
+  as proof of the date. The password is asked for each time and not stored.
+- **Or send it yourself.** `request export ID --out request.eml` writes a draft your mail
+  program opens; afterwards `request mark-sent ID` starts the clock.
+- **Deadlines.** Companies have one month to answer (Art. 12(3)); `request list` counts the
+  days and marks overdue requests. Each request carries a reference like `SP-7K2Q9M` in the
+  subject, so replies can be matched to it later.
+- **Web forms and letters** are never emailed. spurlos shows where to send the text instead.
+- **Example addresses are blocked.** Mail to `.example`, `.test` and similar domains never
+  leaves the machine, so the demo cannot reach anyone.
+
 ## Privacy by design
 
 - **Headers only.** Over IMAP, spurlos asks the server for five header fields
@@ -90,8 +123,9 @@ this; no subject line leaves your computer.
   A test checks exactly this.
 - **Local only.** Everything goes into one SQLite file, `~/.spurlos/vault.db`
   (or `$SPURLOS_HOME`), readable only by you. Nothing is uploaded anywhere.
-- **No data out.** The only network calls are to your own mail server, to a model on your
-  own machine and, if you ask for it, to GitHub to download the public contact database.
+- **No data out.** The only network calls are to your own mail server (reading headers and,
+  when you confirm, sending your requests), to a model on your own machine and, if you ask
+  for it, to GitHub to download the public contact database.
 - **Your own data only.** spurlos works on your own mailbox. It does not search for other
   people and will not send requests in anyone else's name.
 
@@ -140,8 +174,8 @@ left out of the list.
 1. Read the mailbox and list the organisations (done)
 2. Privacy contacts from the open database, signals for real accounts and categories from
    rules or a local model, plus a suggested action per organisation (done)
-3. GDPR requests: access (Art. 15), erasure (Art. 17) and objection (Art. 21) in German and
-   English, from fixed legal templates, sent from your own address only after you confirm
+3. GDPR requests from fixed legal templates in German and English, sent from your own address
+   only after you confirm, with the one-month deadline tracked (done)
 4. A reply agent that matches answers to requests and tells you what happened: confirmed,
    identity check, refused, data attached or no answer
 5. Reminders after the one-month deadline and a complaint draft for the right data

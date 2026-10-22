@@ -46,6 +46,8 @@ class Record:
     language: str | None = None
     needs_id: bool = False
     quality: str = "verified"
+    runs: list[str] = field(default_factory=list)
+    required: list[dict] = field(default_factory=list)
 
     @classmethod
     def from_json(cls, d: dict) -> Record:
@@ -63,6 +65,8 @@ class Record:
             language=d.get("request-language"),
             needs_id=bool(d.get("needs-id-document")),
             quality=d.get("quality", "verified"),
+            runs=list(d.get("runs", [])),
+            required=list(d.get("required-elements", [])),
         )
 
 

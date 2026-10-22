@@ -6,14 +6,16 @@ import argparse
 import getpass
 import os
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 
 from . import census as census_mod
+from . import mailer, outbox
 from . import registry as registry_mod
 from . import triage as triage_mod
 from .demo import CONTACTS, ME, build_mbox
 from .llm import OllamaLLM
 from .orgs import org_domain
+from .requests import is_reserved
 from .sources import ImapSource, read_eml_dir, read_mbox
 from .vault import Vault
 
@@ -70,6 +72,46 @@ def _parser() -> argparse.ArgumentParser:
     build.add_argument("--out", required=True)
     build.add_argument("--commit", default="")
 
+    pro = sub.add_parser("profile", help="your name and email for requests")
+    pro.add_argument("--name")
+    pro.add_argument("--email")
+    pro.add_argument("--address", help="only used when a company requires it")
+
+    rq = sub.add_parser("request", help="GDPR requests: draft, send, track")
+    rqs = rq.add_subparsers(dest="action", required=True)
+    new = rqs.add_parser("new", help="draft a request for one organisation")
+    new.add_argument("domain")
+    new.add_argument("--kind", choices=["access", "erasure", "objection"], required=True)
+    new.add_argument("--record", help="registry slug, when several match (see registry show)")
+    new.add_argument("--lang", choices=["de", "en"])
+    new.add_argument(
+        "--field", action="append", default=[], help='extra id data, "Kundennummer=123"'
+    )
+    new.add_argument(
+        "--portability", action="store_true", help="also ask for a machine-readable copy"
+    )
+    new.add_argument("--objection", action="store_true", help="erasure: also object to processing")
+    bat = rqs.add_parser("batch", help="draft requests for all triage items of one priority")
+    bat.add_argument("--priority", choices=["high", "medium", "low"], default="high")
+    rqs.add_parser("list", help="all requests and their deadlines")
+    for name, text in (("show", "print a request"), ("delete", "delete a draft")):
+        rqs.add_parser(name, help=text).add_argument("id")
+    exp = rqs.add_parser("export", help="save as .eml to send from your own mail program")
+    exp.add_argument("id")
+    exp.add_argument("--out", required=True)
+    snd = rqs.add_parser("send", help="send by SMTP from your own address, after you confirm")
+    snd.add_argument("id")
+    snd.add_argument("--smtp-host")
+    snd.add_argument("--smtp-port", type=int)
+    snd.add_argument("--smtp-user", help="default: your profile email")
+    snd.add_argument("--no-bcc", action="store_true", help="do not send a copy to yourself")
+    snd.add_argument(
+        "--yes", action="store_true", help="skip the question; the mail is still shown"
+    )
+    mk = rqs.add_parser("mark-sent", help="you sent it yourself; start the one-month clock")
+    mk.add_argument("id")
+    mk.add_argument("--date", type=date.fromisoformat, help="YYYY-MM-DD, default today")
+
     demo = sub.add_parser("demo", help="write a made-up mailbox and import it")
     demo.add_argument("--path", default="data/demo.mbox")
     return parser
@@ -121,6 +163,117 @@ def _registry(args) -> int:
     return 0
 
 
+# Known SMTP servers of common mailbox providers: host, port.
+SMTP = {
+    "gmail.com": ("smtp.gmail.com", 465),
+    "googlemail.com": ("smtp.gmail.com", 465),
+    "gmx.de": ("mail.gmx.net", 587),
+    "gmx.net": ("mail.gmx.net", 587),
+    "web.de": ("smtp.web.de", 587),
+}
+
+
+def _print_request(r) -> None:
+    print(f"To: {r['recipient']} ({r['transport']})")
+    print(f"Subject: {r['subject']}\n")
+    print(r["body"])
+
+
+def _send(vault: Vault, r, args) -> int:
+    if r["status"] != "draft":
+        print(f"{r['id']} was already sent on {r['sent'][:10]}", file=sys.stderr)
+        return 1
+    if r["transport"] != "email":
+        print(f"{r['org']} takes requests by {r['transport']}: {r['recipient']}")
+        print("send the text yourself, then run: spurlos request mark-sent " + r["id"])
+        return 1
+    profile = vault.profile()
+    sender = profile["email"]
+    guess = SMTP.get(sender.rsplit("@", 1)[1].lower(), (None, None))
+    host = args.smtp_host or profile.get("smtp_host") or guess[0]
+    port = args.smtp_port or int(profile.get("smtp_port") or 0) or guess[1] or 587
+    if not host:
+        print("unknown mail server; pass --smtp-host and --smtp-port", file=sys.stderr)
+        return 2
+    if is_reserved(r["recipient"]):
+        print(f"{r['recipient']} is a reserved example address; nothing was sent", file=sys.stderr)
+        return 1
+    msg = mailer.build(r, sender, profile["name"], bcc_self=not args.no_bcc)
+    print(f"From: {msg['From']}")
+    _print_request(r)
+    if not args.yes:
+        answer = input(f"\nSend this to {r['recipient']} via {host}? Type yes to send: ")
+        if answer.strip().lower() != "yes":
+            print("not sent")
+            return 1
+    password = os.environ.get("SPURLOS_SMTP_PASSWORD") or getpass.getpass("SMTP password: ")
+    try:
+        mailer.send(msg, host, port, args.smtp_user or sender, password)
+    except mailer.SendError as error:
+        print(error, file=sys.stderr)
+        return 1
+    vault.set_profile(smtp_host=host, smtp_port=str(port))
+    due = outbox.mark_sent(vault, r["id"], message_id=msg["Message-ID"])
+    print(f"sent. The answer is due by {due.isoformat()} (Art. 12(3) GDPR).")
+    return 0
+
+
+def _request(vault: Vault, args) -> int:
+    registry = registry_mod.Registry.load()
+    if args.action == "new":
+        fields = dict(f.split("=", 1) for f in args.field if "=" in f)
+        try:
+            d = outbox.create(
+                vault, registry, args.domain, args.kind, slug=args.record, lang=args.lang,
+                fields=fields, portability=args.portability, objection=args.objection,
+            )  # fmt: skip
+        except (ValueError, outbox.NoContact) as error:
+            print(error, file=sys.stderr)
+            return 1
+        _print_request(vault.request(d.id))
+        print(f"\ndraft {d.id} saved. Next: spurlos request send {d.id}")
+        return 0
+    if args.action == "batch":
+        items = triage_mod.build(vault, registry)
+        try:
+            made, skipped = outbox.from_triage(vault, registry, items, args.priority)
+        except ValueError as error:
+            print(error, file=sys.stderr)
+            return 1
+        for d in made:
+            print(f"draft {d.id}: {d.kind} to {d.org} ({d.recipient})")
+        for line in skipped:
+            print(f"skipped {line}")
+        return 0
+    if args.action == "list":
+        lines = outbox.status_lines(vault)
+        print("\n".join(lines) if lines else "no requests yet")
+        return 0
+    r = vault.request(args.id)
+    if r is None:
+        print(f"no request {args.id}", file=sys.stderr)
+        return 1
+    if args.action == "show":
+        _print_request(r)
+    elif args.action == "delete":
+        print("deleted" if vault.delete_draft(r["id"]) else "only drafts can be deleted")
+    elif args.action == "export":
+        profile = vault.profile()
+        msg = mailer.build(r, profile["email"], profile["name"], bcc_self=False)
+        path = mailer.export_eml(msg, args.out)
+        print(f"saved {path}; open it in your mail program, send it, then run:")
+        print(f"spurlos request mark-sent {r['id']}")
+    elif args.action == "mark-sent":
+        when = None
+        if args.date:
+            when = datetime.combine(args.date, datetime.min.time(), tzinfo=timezone.utc)
+        due = outbox.mark_sent(vault, r["id"], when)
+        print(f"{r['id']} marked as sent; the answer is due by {due.isoformat()}")
+    elif args.action == "send":
+        return _send(vault, r, args)
+    return 0
+
+
 def _triage(vault: Vault, args) -> int:
     llm = OllamaLLM(args.model) if args.llm else None
     failed = []
@@ -168,9 +321,17 @@ def main(argv: list[str] | None = None) -> int:
             print(f"saved contact for {domain}")
         elif args.command == "triage":
             return _triage(vault, args)
+        elif args.command == "profile":
+            vault.set_profile(name=args.name, email=args.email, address=args.address)
+            for key, value in vault.profile().items():
+                if not key.startswith("smtp"):
+                    print(f"{key}: {value}")
+        elif args.command == "request":
+            return _request(vault, args)
         elif args.command == "demo":
             n = build_mbox(args.path)
             vault.add_me(ME)
+            vault.set_profile(name="Max Mustermann", email=ME)
             for domain, email in CONTACTS.items():
                 vault.set_contact(domain, email=email)
             added, _ = vault.add(read_mbox(args.path))
