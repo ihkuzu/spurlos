@@ -1,0 +1,412 @@
+{
+ "note": "Synthetic replies written for this project; the companies and people are made up.",
+ "cases": [
+  {
+   "id": "r01",
+   "label": "confirmed",
+   "kind": "erasure",
+   "lang": "de",
+   "subject": "AW: Antrag auf Löschung nach Art. 17 DSGVO",
+   "body": "Sehr geehrter Herr Mustermann,\n\nwir bestätigen Ihnen, dass Ihr Kundenkonto sowie alle damit verbundenen personenbezogenen Daten heute gelöscht wurden. Sie erhalten keine weiteren E-Mails von uns.\n\nMit freundlichen Grüßen\nIhr Datenschutzteam",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r02",
+   "label": "confirmed",
+   "kind": "erasure",
+   "lang": "de",
+   "subject": "Ihre Löschanfrage",
+   "body": "Guten Tag,\n\nIhre Daten wurden aus unseren Systemen entfernt. Bitte beachten Sie: Rechnungsdaten müssen wir nach § 147 AO zehn Jahre aufbewahren. Diese sind für jede andere Nutzung gesperrt und werden nach Ablauf der Frist gelöscht.\n\nFreundliche Grüße\nKundenservice Brotkorb Shop",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r03",
+   "label": "confirmed",
+   "kind": "objection",
+   "lang": "de",
+   "subject": "Re: Widerspruch nach Art. 21 DSGVO",
+   "body": "Hallo Herr Mustermann,\n\nwir haben Ihre Anschrift und E-Mail-Adresse in unsere Werbesperrliste aufgenommen. Sie werden künftig keine Werbung mehr von uns erhalten. Bis die Sperre in allen Systemen greift, kann es bis zu zwei Wochen dauern.\n\nViele Grüße",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r04",
+   "label": "confirmed",
+   "kind": "erasure",
+   "lang": "en",
+   "subject": "Re: Request for erasure under Art. 17 GDPR",
+   "body": "Hi Max,\n\nThanks for getting in touch. Your account and the personal data linked to it have been permanently erased from our production systems. Backups are overwritten within 30 days.\n\nKind regards,\nPrivacy Team, Pixelforum",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r05",
+   "label": "confirmed",
+   "kind": "objection",
+   "lang": "en",
+   "subject": "Your objection",
+   "body": "Dear Mr Mustermann,\n\nWe confirm that your objection has been recorded. We no longer process your data for marketing or profiling, and you have been removed from all mailing lists.\n\nBest regards,\nData Protection Office",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r06",
+   "label": "data_provided",
+   "kind": "access",
+   "lang": "de",
+   "subject": "Ihre Auskunft nach Art. 15 DSGVO",
+   "body": "Sehr geehrter Herr Mustermann,\n\nanbei erhalten Sie die Auskunft über die zu Ihrer Person gespeicherten Daten sowie eine Kopie der Daten als PDF. Das Passwort für die Datei senden wir Ihnen in einer separaten E-Mail.\n\nMit freundlichen Grüßen\nDatenschutzbeauftragter",
+   "attachments": [
+    "Auskunft_Mustermann.pdf"
+   ],
+   "auto": false
+  },
+  {
+   "id": "r07",
+   "label": "data_provided",
+   "kind": "access",
+   "lang": "en",
+   "subject": "Your data access request is ready",
+   "body": "Hello,\n\nYour data export is ready. You can download it from the link below for the next 14 days:\nhttps://privacy.travelnest.example/export/8f2c\n\nThe archive contains your profile, bookings and support conversations.\n\nTravelNest Privacy",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r08",
+   "label": "data_provided",
+   "kind": "access",
+   "lang": "de",
+   "subject": "Datenkopie",
+   "body": "Guten Tag Herr Mustermann,\n\nim Anhang finden Sie eine Kopie Ihrer bei uns gespeicherten personenbezogenen Daten (Stammdaten, Vertragsdaten, Zahlungshistorie) im CSV-Format. Zu den Zwecken der Verarbeitung und den Empfängern verweisen wir auf das beigefügte Informationsblatt.\n\nFreundliche Grüße\nStromfix Kundenservice",
+   "attachments": [
+    "daten.csv",
+    "Informationsblatt.pdf"
+   ],
+   "auto": false
+  },
+  {
+   "id": "r09",
+   "label": "data_provided",
+   "kind": "access",
+   "lang": "en",
+   "subject": "Re: Request for access under Art. 15 GDPR",
+   "body": "Dear Max Mustermann,\n\nPlease find attached a copy of the personal data we hold about you, together with the information required by Article 15(1) GDPR on purposes, categories, recipients and retention periods.\n\nSincerely,\nCodeCamp Online Data Protection",
+   "attachments": [
+    "data_export.zip"
+   ],
+   "auto": false
+  },
+  {
+   "id": "r10",
+   "label": "data_provided",
+   "kind": "access",
+   "lang": "de",
+   "subject": "Auskunft",
+   "body": "Hallo,\n\nwir speichern zu Ihrer Person folgende Daten: Name, E-Mail-Adresse, Lieferadresse sowie die Bestellungen der letzten drei Jahre (Bestellnummern 4411, 5820, 6012). Die Daten werden zur Vertragsabwicklung verarbeitet und an unseren Versanddienstleister weitergegeben. Gespeichert werden sie bis zum Ablauf der gesetzlichen Aufbewahrungsfristen.\n\nBeste Grüße\nLesefuchs",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r11",
+   "label": "no_data",
+   "kind": "access",
+   "lang": "de",
+   "subject": "AW: Anfrage auf Auskunft nach Art. 15 DSGVO",
+   "body": "Sehr geehrter Herr Mustermann,\n\nunter der von Ihnen angegebenen E-Mail-Adresse konnten wir kein Kundenkonto finden. Wir verarbeiten daher keine personenbezogenen Daten zu Ihrer Person.\n\nMit freundlichen Grüßen",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r12",
+   "label": "no_data",
+   "kind": "erasure",
+   "lang": "en",
+   "subject": "Re: Request for erasure",
+   "body": "Hello Max,\n\nWe searched our systems for the email address you provided and found no records associated with it. There is therefore nothing for us to delete.\n\nRegards,\nSupport",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r13",
+   "label": "no_data",
+   "kind": "access",
+   "lang": "de",
+   "subject": "Ihre Anfrage",
+   "body": "Guten Tag,\n\nwir haben Ihre Anfrage geprüft. Zu Ihrer Person sind bei uns keine Daten gespeichert.\n\nFreundliche Grüße\nFitWerk Studios",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r14",
+   "label": "no_data",
+   "kind": "objection",
+   "lang": "en",
+   "subject": "Your objection under Art. 21",
+   "body": "Dear Mr Mustermann,\n\nThank you for your message. We do not hold any personal data relating to you, so we do not process your data for direct marketing either.\n\nKind regards",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r15",
+   "label": "no_data",
+   "kind": "erasure",
+   "lang": "de",
+   "subject": "Löschung",
+   "body": "Hallo Herr Mustermann,\n\nIhre E-Mail-Adresse ist in unserer Datenbank nicht vorhanden. Möglicherweise haben Sie sich mit einer anderen Adresse registriert? In diesem Fall können Sie uns diese gerne mitteilen.\n\nViele Grüße",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r16",
+   "label": "id_required",
+   "kind": "access",
+   "lang": "de",
+   "subject": "Rückfrage zu Ihrer Datenauskunft",
+   "body": "Sehr geehrter Herr Mustermann,\n\num sicherzustellen, dass wir die Auskunft nur an die berechtigte Person erteilen, bitten wir Sie, uns Ihr Geburtsdatum und Ihre Kundennummer mitzuteilen.\n\nMit freundlichen Grüßen\nKontora Bank Datenschutz",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r17",
+   "label": "id_required",
+   "kind": "erasure",
+   "lang": "en",
+   "subject": "Action required: verify your request",
+   "body": "Hi,\n\nBefore we can process your erasure request, we need to verify that you are the account holder. Please click the link below while logged in to your account to confirm the request:\nhttps://kartenhaus-games.example/verify\n\nThanks,\nPlayer Support",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r18",
+   "label": "id_required",
+   "kind": "access",
+   "lang": "de",
+   "subject": "Ihre Anfrage nach Art. 15 DSGVO",
+   "body": "Guten Tag,\n\nzur Bearbeitung Ihrer Anfrage benötigen wir eine Kopie Ihres Personalausweises. Bitte schwärzen Sie dabei alle Angaben außer Name, Anschrift und Geburtsdatum.\n\nFreundliche Grüße",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r19",
+   "label": "id_required",
+   "kind": "objection",
+   "lang": "en",
+   "subject": "Re: Objection under Art. 21 GDPR",
+   "body": "Dear Max,\n\nWe could not find an account with the address you wrote from. Could you send us the postal address you used when ordering, so that we can locate your record?\n\nBest,\nCustomer Care",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r20",
+   "label": "id_required",
+   "kind": "erasure",
+   "lang": "de",
+   "subject": "AW: Löschantrag",
+   "body": "Hallo,\n\nwir haben mehrere Kundenkonten mit Ihrem Namen gefunden. Bitte teilen Sie uns die Postleitzahl Ihrer Lieferadresse mit, damit wir das richtige Konto löschen.\n\nViele Grüße\nMietradar Team",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r21",
+   "label": "extension",
+   "kind": "access",
+   "lang": "de",
+   "subject": "Fristverlängerung Ihrer Auskunft",
+   "body": "Sehr geehrter Herr Mustermann,\n\naufgrund der Komplexität und der Anzahl der Anträge verlängert sich die Frist zur Beantwortung Ihrer Anfrage gemäß Art. 12 Abs. 3 Satz 2 DSGVO um weitere zwei Monate. Wir melden uns spätestens bis zum 15.01.2027 bei Ihnen.\n\nMit freundlichen Grüßen",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r22",
+   "label": "extension",
+   "kind": "erasure",
+   "lang": "en",
+   "subject": "Update on your request",
+   "body": "Dear Mr Mustermann,\n\nDue to a high number of requests we need to extend the period for responding to your request by two further months, as permitted by Article 12(3) GDPR. We apologise for the delay.\n\nKind regards,\nPrivacy Team",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r23",
+   "label": "extension",
+   "kind": "access",
+   "lang": "de",
+   "subject": "Ihre Datenauskunft",
+   "body": "Hallo Herr Mustermann,\n\ndie Zusammenstellung Ihrer Daten aus mehreren Systemen nimmt mehr Zeit in Anspruch als erwartet. Wir benötigen daher bis zu zwei Monate zusätzlich und bitten um Ihr Verständnis.\n\nBeste Grüße",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r24",
+   "label": "extension",
+   "kind": "access",
+   "lang": "en",
+   "subject": "We need more time",
+   "body": "Hi Max,\n\nYour access request covers data from several of our services. To give you a complete answer we will need more time: we are extending the deadline as allowed by the GDPR and will reply within the next two months.\n\nThanks for your patience.",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r25",
+   "label": "extension",
+   "kind": "objection",
+   "lang": "de",
+   "subject": "Widerspruch – Zwischenstand",
+   "body": "Guten Tag,\n\nwir prüfen Ihren Widerspruch derzeit mit unserer Rechtsabteilung. Die Frist für unsere Antwort verlängern wir gemäß Art. 12 Abs. 3 DSGVO um zwei Monate.\n\nFreundliche Grüße",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r26",
+   "label": "refused",
+   "kind": "erasure",
+   "lang": "de",
+   "subject": "AW: Antrag auf Löschung",
+   "body": "Sehr geehrter Herr Mustermann,\n\nleider können wir Ihrem Antrag nicht nachkommen, da zwischen Ihnen und uns ein laufender Vertrag besteht. Eine Löschung ist erst nach Vertragsende möglich.\n\nMit freundlichen Grüßen\nStromfix",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r27",
+   "label": "refused",
+   "kind": "access",
+   "lang": "en",
+   "subject": "Re: Request for access",
+   "body": "Dear Sir,\n\nWe consider your request to be manifestly unfounded, as you have submitted the same request four times within the last month. We will therefore not act on it, in line with Article 12(5) GDPR.\n\nRegards",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r28",
+   "label": "refused",
+   "kind": "objection",
+   "lang": "de",
+   "subject": "Ihr Widerspruch",
+   "body": "Hallo,\n\nwir haben Ihren Widerspruch geprüft. Die Verarbeitung Ihrer Daten erfolgt zur Betrugsprävention aufgrund zwingender schutzwürdiger Gründe, die Ihre Interessen überwiegen. Wir lehnen den Widerspruch daher ab.\n\nFreundliche Grüße",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r29",
+   "label": "refused",
+   "kind": "erasure",
+   "lang": "en",
+   "subject": "Your erasure request",
+   "body": "Hello,\n\nWe are not the controller of the data you mention; we only process it on behalf of our clients. Please contact the company you have a relationship with directly. We are unable to delete the data ourselves.\n\nBest regards",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r30",
+   "label": "refused",
+   "kind": "erasure",
+   "lang": "de",
+   "subject": "Löschung nicht möglich",
+   "body": "Sehr geehrter Herr Mustermann,\n\nIhr Konto weist einen offenen Betrag von 49,90 EUR auf. Solange die Forderung besteht, werden wir Ihre Daten nicht löschen.\n\nMit freundlichen Grüßen\nForderungsmanagement",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r31",
+   "label": "acknowledged",
+   "kind": "erasure",
+   "lang": "de",
+   "subject": "Ihre Anfrage ist bei uns eingegangen [Ticket #48213]",
+   "body": "Hallo Herr Mustermann,\n\nvielen Dank für Ihre Nachricht. Ihre Anfrage ist bei uns eingegangen und wurde an die zuständige Abteilung weitergeleitet. Wir werden Ihre Daten löschen und Sie anschließend informieren.\n\nIhr Serviceteam",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r32",
+   "label": "acknowledged",
+   "kind": "access",
+   "lang": "en",
+   "subject": "We received your request",
+   "body": "Hi Max,\n\nThis is to confirm that we have received your data access request. Your case number is DSR-20931. We will respond within one month.\n\nPrivacy Team",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r33",
+   "label": "acknowledged",
+   "kind": "objection",
+   "lang": "de",
+   "subject": "Re: Widerspruch",
+   "body": "Guten Tag,\n\nbesten Dank für Ihre E-Mail. Wir bearbeiten Ihr Anliegen schnellstmöglich und melden uns in Kürze bei Ihnen.\n\nFreundliche Grüße",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r34",
+   "label": "acknowledged",
+   "kind": "erasure",
+   "lang": "en",
+   "subject": "Re: Request for erasure under Art. 17 GDPR",
+   "body": "Hello,\n\nThank you for contacting us. Our data protection team will review your request and get back to you as soon as possible.\n\nBest regards,\nCustomer Support",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r35",
+   "label": "acknowledged",
+   "kind": "access",
+   "lang": "de",
+   "subject": "Bestätigung Ihrer Anfrage",
+   "body": "Sehr geehrter Herr Mustermann,\n\nhiermit bestätigen wir den Eingang Ihres Auskunftsersuchens vom 22.10.2026. Die Bearbeitung erfolgt innerhalb der gesetzlichen Frist.\n\nMit freundlichen Grüßen\nApotheke Rosengarten",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r36",
+   "label": "auto_reply",
+   "kind": "access",
+   "lang": "de",
+   "subject": "Automatische Antwort: Anfrage auf Auskunft",
+   "body": "Ich bin bis einschließlich 03.11. nicht im Büro und habe keinen Zugriff auf meine E-Mails. In dringenden Fällen wenden Sie sich bitte an info@example.org.",
+   "attachments": [],
+   "auto": true
+  },
+  {
+   "id": "r37",
+   "label": "auto_reply",
+   "kind": "erasure",
+   "lang": "en",
+   "subject": "Out of office",
+   "body": "Thank you for your email. I am currently out of the office with limited access to email and will return on Monday.",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r38",
+   "label": "auto_reply",
+   "kind": "erasure",
+   "lang": "de",
+   "subject": "Diese Adresse wird nicht überwacht",
+   "body": "Bitte antworten Sie nicht auf diese E-Mail. Dieses Postfach wird nicht überwacht. Für Anliegen nutzen Sie bitte unser Kontaktformular auf der Website.",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r39",
+   "label": "auto_reply",
+   "kind": "objection",
+   "lang": "en",
+   "subject": "Automatic reply",
+   "body": "This is an automated message. Our support hours are Monday to Friday, 9:00 to 17:00. Your message will be read on the next working day.",
+   "attachments": [],
+   "auto": false
+  },
+  {
+   "id": "r40",
+   "label": "auto_reply",
+   "kind": "access",
+   "lang": "de",
+   "subject": "Abwesenheitsnotiz",
+   "body": "Vielen Dank für Ihre Nachricht. Ich bin derzeit im Urlaub. Ihre E-Mail wird nicht weitergeleitet.",
+   "attachments": [],
+   "auto": false
+  }
+ ]
+}

@@ -53,6 +53,22 @@ CREATE TABLE IF NOT EXISTS requests (
     due TEXT,
     message_id TEXT
 );
+CREATE TABLE IF NOT EXISTS replies (
+    key TEXT PRIMARY KEY,
+    request_id TEXT,
+    sender TEXT NOT NULL,
+    date TEXT,
+    subject TEXT NOT NULL,
+    body TEXT NOT NULL,
+    attachments TEXT NOT NULL,
+    matched_by TEXT NOT NULL,
+    label TEXT,
+    summary TEXT,
+    asks_for TEXT,
+    source TEXT,
+    next_step TEXT,
+    created TEXT NOT NULL
+);
 """
 
 
@@ -187,6 +203,57 @@ class Vault:
         self.db.execute(
             "UPDATE requests SET status = 'sent', sent = ?, due = ?, message_id = ? WHERE id = ?",
             (sent, due, message_id, request_id.upper()),
+        )
+        self.db.commit()
+
+    def set_status(self, request_id: str, status: str, due: str | None = None) -> None:
+        if due:
+            self.db.execute(
+                "UPDATE requests SET status = ?, due = ? WHERE id = ?", (status, due, request_id)
+            )
+        else:
+            self.db.execute("UPDATE requests SET status = ? WHERE id = ?", (status, request_id))
+        self.db.commit()
+
+    def has_reply(self, key: str) -> bool:
+        return bool(self.db.execute("SELECT 1 FROM replies WHERE key = ?", (key,)).fetchone())
+
+    def add_reply(self, reply, result: dict) -> None:
+        req = result.get("request") or {}
+        decision = result.get("decision") or {}
+        self.db.execute(
+            "INSERT OR REPLACE INTO replies VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))",
+            (
+                reply.key,
+                req.get("id"),
+                reply.sender,
+                reply.date.isoformat() if reply.date else None,
+                reply.subject,
+                reply.body,
+                ", ".join(reply.attachments),
+                result.get("matched_by", "none"),
+                result.get("label"),
+                result.get("summary"),
+                result.get("asks_for"),
+                result.get("source"),
+                decision.get("next"),
+            ),
+        )
+        self.db.commit()
+
+    def replies(self, request_id: str | None = None) -> list[sqlite3.Row]:
+        if request_id:
+            rows = self.db.execute(
+                "SELECT * FROM replies WHERE request_id = ? ORDER BY date", (request_id.upper(),)
+            )
+        else:
+            rows = self.db.execute("SELECT * FROM replies ORDER BY date")
+        return rows.fetchall()
+
+    def relabel(self, key: str, label: str, next_step: str) -> None:
+        self.db.execute(
+            "UPDATE replies SET label = ?, source = 'you', next_step = ? WHERE key = ?",
+            (label, next_step, key),
         )
         self.db.commit()
 

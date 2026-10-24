@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import argparse
 import getpass
+import json
 import os
 import sys
 from datetime import date, datetime, timezone
+from pathlib import Path
 
 from . import census as census_mod
-from . import mailer, outbox
+from . import inbox, mailer, outbox, reply_eval
 from . import registry as registry_mod
 from . import triage as triage_mod
 from .demo import CONTACTS, ME, build_mbox
@@ -17,6 +19,7 @@ from .llm import OllamaLLM
 from .orgs import org_domain
 from .requests import is_reserved
 from .sources import ImapSource, read_eml_dir, read_mbox
+from .sources import raw_messages as read_raw
 from .vault import Vault
 
 
@@ -111,6 +114,35 @@ def _parser() -> argparse.ArgumentParser:
     mk = rqs.add_parser("mark-sent", help="you sent it yourself; start the one-month clock")
     mk.add_argument("id")
     mk.add_argument("--date", type=date.fromisoformat, help="YYYY-MM-DD, default today")
+
+    rp = sub.add_parser("replies", help="answers to your requests, read by the reply agent")
+    rps = rp.add_subparsers(dest="action", required=True)
+
+    def agent_options(p):
+        p.add_argument("--llm", action="store_true", help="label with a local Ollama model")
+        p.add_argument("--model", help="Ollama model, default $SPURLOS_MODEL or llama3.2:3b")
+        p.add_argument("--dry-run", action="store_true", help="show, but do not change statuses")
+
+    rimp = rps.add_parser("import", help="look for replies in an mbox file or .eml folder")
+    rimp.add_argument("path")
+    agent_options(rimp)
+    rfet = rps.add_parser("fetch", help="look for replies over IMAP (read-only)")
+    rfet.add_argument("--host", required=True)
+    rfet.add_argument("--user", required=True)
+    rfet.add_argument("--port", type=int, default=993)
+    rfet.add_argument("--folder", action="append", help="default INBOX")
+    agent_options(rfet)
+    rlist = rps.add_parser("list", help="replies and what the agent made of them")
+    rlist.add_argument("id", nargs="?", help="only replies to this request")
+    rlab = rps.add_parser("relabel", help="correct the agent: set the label yourself")
+    rlab.add_argument("key", help="reply key prefix from replies list")
+    rlab.add_argument("label", choices=list(inbox.agent.labels.LABELS))
+
+    ev = sub.add_parser("eval-replies", help="measure the reply agent on 40 example answers")
+    ev.add_argument("--llm", action="store_true", help="also run a local Ollama model")
+    ev.add_argument("--model", help="Ollama model, default $SPURLOS_MODEL or llama3.2:3b")
+    ev.add_argument("--cases", help="another JSON file with cases")
+    ev.add_argument("--out", help="write all outcomes as JSON")
 
     demo = sub.add_parser("demo", help="write a made-up mailbox and import it")
     demo.add_argument("--path", default="data/demo.mbox")
@@ -274,6 +306,82 @@ def _request(vault: Vault, args) -> int:
     return 0
 
 
+def _replies(vault: Vault, args) -> int:
+    if args.action == "list":
+        rows = vault.replies(args.id)
+        if not rows:
+            print("no replies yet")
+        for r in rows:
+            print(f"{r['key'][:8]}  {r['request_id'] or '?':9} {(r['date'] or '')[:10]}  "
+                  f"{r['label'] or '-':13} {r['source'] or '':14} {r['sender']}")  # fmt: skip
+            if r["next_step"]:
+                print(f"          next: {r['next_step']}")
+        return 0
+    if args.action == "relabel":
+        rows = [r for r in vault.replies() if r["key"].startswith(args.key)]
+        if len(rows) != 1:
+            print("give a key prefix that matches exactly one reply", file=sys.stderr)
+            return 1
+        reply = rows[0]
+        req = vault.request(reply["request_id"]) if reply["request_id"] else None
+        decision = inbox.agent.decide(req["kind"], args.label, reply["asks_for"] or "",
+                                      req["due"]) if req else {}  # fmt: skip
+        vault.relabel(reply["key"], args.label, decision.get("next", ""))
+        if req and decision.get("status"):
+            vault.set_status(req["id"], decision["status"], decision.get("due"))
+        print(f"{reply['key'][:8]} is now {args.label}; next: {decision.get('next', '-')}")
+        return 0
+    llm = OllamaLLM(args.model) if args.llm else None
+    if args.action == "import":
+        raws = read_raw(args.path)
+    else:
+        raws = _imap_replies(vault, args)
+    results = inbox.process(vault, raws, llm, apply=not args.dry_run)
+    print(inbox.format_results(results))
+    return 0
+
+
+def _imap_replies(vault: Vault, args):
+    orgs, since = inbox.watched(vault)
+    if not orgs:
+        print("no sent requests yet, so there is nothing to look for")
+        return []
+    password = os.environ.get("SPURLOS_IMAP_PASSWORD") or getpass.getpass("IMAP password: ")
+    source = ImapSource(args.host, args.user, password, args.port)
+    raws = []
+    try:
+        for folder in args.folder or ["INBOX"]:
+            uids: set[bytes] = set()
+            for criteria in inbox.imap_criteria(orgs, since):
+                uids.update(source.search(folder, *criteria))
+            raws += list(source.full_messages(folder, sorted(uids, key=int)))
+    finally:
+        source.close()
+    return raws
+
+
+def _eval(args) -> int:
+    cases = reply_eval.load_cases(args.cases)
+    runs = {"rules": reply_eval.run(cases)}
+    if args.llm:
+        llm = OllamaLLM(args.model)
+        print(f"running {llm.name} on {len(cases)} replies ...", file=sys.stderr)
+        runs[llm.name] = reply_eval.run(
+            cases, llm, on_case=lambda o: print("." if o["ok"] else "x", end="", flush=True,
+                                                 file=sys.stderr),
+        )  # fmt: skip
+        print(file=sys.stderr)
+    for name, outcomes in runs.items():
+        print(reply_eval.format_summary(name, reply_eval.summarize(outcomes)))
+    if args.out:
+        out = {
+            name: {"summary": reply_eval.summarize(o), "outcomes": o} for name, o in runs.items()
+        }
+        Path(args.out).write_text(json.dumps(out, indent=1), "utf-8")
+        print(f"wrote {args.out}")
+    return 0
+
+
 def _triage(vault: Vault, args) -> int:
     llm = OllamaLLM(args.model) if args.llm else None
     failed = []
@@ -298,6 +406,8 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "registry":
         return _registry(args)
+    if args.command == "eval-replies":
+        return _eval(args)
     vault = Vault(args.vault)
     try:
         if args.command == "import":
@@ -328,6 +438,8 @@ def main(argv: list[str] | None = None) -> int:
                     print(f"{key}: {value}")
         elif args.command == "request":
             return _request(vault, args)
+        elif args.command == "replies":
+            return _replies(vault, args)
         elif args.command == "demo":
             n = build_mbox(args.path)
             vault.add_me(ME)

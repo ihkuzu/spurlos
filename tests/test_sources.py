@@ -86,3 +86,12 @@ def test_imap_is_read_only_and_never_fetches_bodies(fake_imap):
 def test_imap_folders_skip_noselect(fake_imap):
     src = ImapSource("h", "u", "p")
     assert src.folders() == ["INBOX", "[Gmail]/Sent Mail"]
+
+
+def test_imap_full_messages_only_for_given_uids(fake_imap):
+    src = ImapSource("h", "u", "p")
+    assert src.search("INBOX", "SUBJECT", "SP-") == [b"1", b"2"]
+    got = list(src.full_messages("INBOX", [b"1", b"2"]))
+    assert len(got) == 2
+    fetch = [c for c in fake_imap.instances[0].calls if c[:2] == ("uid", "FETCH")][-1]
+    assert fetch[2] == "1,2" and fetch[3] == "(BODY.PEEK[])"

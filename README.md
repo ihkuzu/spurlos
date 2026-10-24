@@ -8,8 +8,8 @@ It runs on your own machine: no account, no server, no third party that you have
 your data to so that it can be deleted.
 
 > Status: early. Reading your mailbox, finding the organisations behind it and their privacy
-> contacts, deciding what to do and sending GDPR requests with deadline tracking works.
-> Reading the replies with an agent and escalating follow, see [Roadmap](#roadmap).
+> contacts, sending GDPR requests and reading the answers with a local agent works.
+> Escalation and reading the data exports follow, see [Roadmap](#roadmap).
 
 ## What it does today
 
@@ -115,6 +115,67 @@ SP-F874UW  access    apotheke-rosengarten.example   email   draft
 - **Example addresses are blocked.** Mail to `.example`, `.test` and similar domains never
   leaves the machine, so the demo cannot reach anyone.
 
+## Reading the answers
+
+```
+spurlos replies import ~/Downloads/inbox.mbox     # or a folder of .eml files
+spurlos replies fetch --host imap.gmail.com --user max@gmail.com --llm
+spurlos replies list
+spurlos replies relabel 3f9a1c2e data_provided     # the agent was wrong: you decide
+```
+
+```
+SP-5WEJ9B codecamp.example: id_required (rules)
+    next: they ask for more information; send only that
+
+SP-5WEJ9B  erasure   codecamp.example               email   waiting_on_you
+```
+
+With `--llm` the model also writes a one-line summary and what exactly they ask for.
+
+The reply agent is a small [LangGraph](https://github.com/langchain-ai/langgraph) graph:
+
+```mermaid
+flowchart LR
+    A([reply]) --> M[match]
+    M -- no request --> E([stored for review])
+    M --> C[classify]
+    C --> K{valid?}
+    K -- no, retry once --> C
+    K -- yes --> D[decide]
+    D --> S([new status and next step])
+```
+
+- **match** finds the request by thread (`In-Reply-To`), by the `SP-` reference or, if only
+  one request is open with that company, by sender domain. No model.
+- **classify** gives one of eight labels: `confirmed`, `data_provided`, `no_data`,
+  `id_required`, `extension`, `refused`, `acknowledged`, `auto_reply`. Mails marked
+  `Auto-Submitted` skip the model. Without `--llm`, keyword rules decide.
+- **check** rejects any answer that is not one of the eight labels and asks the model once
+  more, telling it what was wrong. A second bad answer, or a model that is not running, falls
+  back to the rules.
+- **decide** is a fixed table, not a model: `confirmed` closes the request, `extension` moves
+  the deadline by two months (Art. 12(3)), `refused` marks it for a complaint, `id_required`
+  tells you what they want. The agent never sends anything.
+
+**What is read.** spurlos downloads full messages only for possible replies: mails with an
+`SP-` reference in the subject and mails from companies you have written to, since the day
+you first wrote. Everything else stays headers-only. The text of a reply is treated as data;
+a mail that says "ignore your instructions" can at most get a wrong label, which you can
+correct with `relabel`.
+
+### How well does it label?
+
+`spurlos eval-replies` runs the agent on 40 example answers in German and English, five per
+label, and `--llm` adds a local model:
+
+| labeller | correct | notes |
+|---|---|---|
+| keyword rules | 31 / 40 | weakest on `no_data` (2/5) and `id_required` (3/5) |
+
+Model results follow. The examples are made up, written for this project by the same person
+who wrote the rules, so the rules may look better here than on real mail.
+
 ## Privacy by design
 
 - **Headers only.** Over IMAP, spurlos asks the server for five header fields
@@ -176,8 +237,8 @@ left out of the list.
    rules or a local model, plus a suggested action per organisation (done)
 3. GDPR requests from fixed legal templates in German and English, sent from your own address
    only after you confirm, with the one-month deadline tracked (done)
-4. A reply agent that matches answers to requests and tells you what happened: confirmed,
-   identity check, refused, data attached or no answer
+4. A reply agent that matches answers to requests, labels them and sets the next step, with
+   an eval of 40 example answers (done)
 5. Reminders after the one-month deadline and a complaint draft for the right data
    protection authority
 6. Reading the data exports companies send back, so you can see who knows what about you

@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 dependencies = [
+    "langgraph>=1.0",
     "tldextract>=5.0",
 ]
 
@@ -26,7 +27,7 @@ spurlos = "spurlos.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-spurlos = ["data/*.json.gz"]
+spurlos = ["data/*.json.gz", "data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -27,3 +27,4 @@ jobs:
       - run: spurlos registry show zalando.de
       - run: spurlos --vault demo.db request batch
       - run: spurlos --vault demo.db request list
+      - run: spurlos eval-replies

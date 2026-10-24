@@ -34,6 +34,23 @@ def read_mbox(path: str | Path) -> Iterator[Header]:
         box.close()
 
 
+def raw_messages(path: str | Path) -> Iterator[bytes]:
+    """Whole messages from an mbox file or a folder of .eml files."""
+    path = Path(path)
+    if path.is_dir():
+        for file in sorted(path.rglob("*.eml")):
+            yield file.read_bytes()
+        return
+    if not path.is_file():
+        raise FileNotFoundError(2, "no such file", str(path))
+    box = mailbox.mbox(str(path), create=False)
+    try:
+        for key in box.iterkeys():
+            yield box.get_bytes(key)
+    finally:
+        box.close()
+
+
 def read_eml_dir(path: str | Path) -> Iterator[Header]:
     if not Path(path).is_dir():
         raise FileNotFoundError(2, "no such folder", str(path))
@@ -86,6 +103,27 @@ class ImapSource:
                     header = parse_header(row[1], source=f"imap:{folder}")
                     if header:
                         yield header
+
+    def search(self, folder: str, *criteria: str) -> list[bytes]:
+        status, _ = self.conn.select(_quote(folder), readonly=True)
+        if status != "OK":
+            raise RuntimeError(f"cannot open folder {folder}")
+        status, data = self.conn.uid("SEARCH", None, *criteria)
+        if status != "OK":
+            return []
+        return data[0].split() if data and data[0] else []
+
+    def full_messages(self, folder: str, uids: list[bytes]) -> Iterator[bytes]:
+        """Whole messages, only for the UIDs asked for; BODY.PEEK keeps them unread."""
+        self.conn.select(_quote(folder), readonly=True)
+        for start in range(0, len(uids), 50):
+            chunk = b",".join(uids[start : start + 50]).decode()
+            status, rows = self.conn.uid("FETCH", chunk, "(BODY.PEEK[])")
+            if status != "OK":
+                continue
+            for row in rows or []:
+                if isinstance(row, tuple) and len(row) == 2:
+                    yield row[1]
 
     def close(self) -> None:
         try:
