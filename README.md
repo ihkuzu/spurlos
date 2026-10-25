@@ -79,8 +79,9 @@ spurlos contact shop.de --email datenschutz@shop.de   # add a contact the databa
 spurlos registry update             # fetch the latest database from GitHub
 ```
 
-The model runs through [Ollama](https://ollama.com) on your machine. A 3B model is enough for
-this; no subject line leaves your computer.
+The model runs through [Ollama](https://ollama.com) on your machine; no subject line leaves
+your computer. Categories are an easy task and a 3B model is enough for them; for reading
+replies a 7B model is clearly better, see [How well does it label?](#how-well-does-it-label).
 
 ## Sending requests
 
@@ -169,12 +170,21 @@ correct with `relabel`.
 `spurlos eval-replies` runs the agent on 40 example answers in German and English, five per
 label, and `--llm` adds a local model:
 
-| labeller | correct | notes |
-|---|---|---|
-| keyword rules | 31 / 40 | weakest on `no_data` (2/5) and `id_required` (3/5) |
+| labeller | correct | time per reply | weakest labels |
+|---|---|---|---|
+| keyword rules | 31 / 40 | 0 s | `no_data` 2/5, `id_required` 3/5 |
+| llama3.2:3b | 34 / 40 | 2.6 s | `confirmed` 2/5 (read as `refused`), `id_required` 3/5 |
+| qwen2.5:7b | 39 / 40 | 4.4 s | `acknowledged` 4/5 (one read as `confirmed`) |
 
-Model results follow. The examples are made up, written for this project by the same person
-who wrote the rules, so the rules may look better here than on real mail.
+Measured on an RTX 2060 with 6 GB through Ollama, temperature 0, no retries or fallbacks
+needed in either run. The 3B model beats the rules by three replies but mixes up "deleted,
+except invoices we must keep" with a refusal; the 7B model gets all but one right and is the
+recommended default when it fits on the card.
+
+Two things to keep in mind. The examples are made up, written for this project by the same
+person who wrote the rules, so the rules may look better here than on real mail. And 40
+replies are few: one reply more or less is 2.5 points, so read the numbers as a ranking, not
+a precise score.
 
 ## Privacy by design
 
