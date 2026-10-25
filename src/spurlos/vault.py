@@ -85,6 +85,10 @@ class Vault:
         self.db = sqlite3.connect(self.path)
         self.db.row_factory = sqlite3.Row
         self.db.executescript(SCHEMA)
+        columns = {r[1] for r in self.db.execute("PRAGMA table_info(requests)")}
+        if "parent" not in columns:
+            # vaults from before reminders and complaints existed
+            self.db.execute("ALTER TABLE requests ADD COLUMN parent TEXT")
         try:
             os.chmod(self.path, 0o600)
         except OSError:
@@ -173,8 +177,20 @@ class Vault:
     def add_request(self, d) -> None:
         self.db.execute(
             "INSERT INTO requests (id, org, record, kind, lang, recipient, transport, subject,"
-            " body, status, created) VALUES (?,?,?,?,?,?,?,?,?,'draft',datetime('now'))",
-            (d.id, d.org, d.record, d.kind, d.lang, d.recipient, d.transport, d.subject, d.body),
+            " body, status, created, parent)"
+            " VALUES (?,?,?,?,?,?,?,?,?,'draft',datetime('now'),?)",
+            (
+                d.id,
+                d.org,
+                d.record,
+                d.kind,
+                d.lang,
+                d.recipient,
+                d.transport,
+                d.subject,
+                d.body,
+                getattr(d, "parent", None),
+            ),
         )
         self.db.commit()
 
@@ -191,6 +207,11 @@ class Vault:
         else:
             rows = self.db.execute("SELECT * FROM requests ORDER BY created")
         return rows.fetchall()
+
+    def children(self, request_id: str) -> list[sqlite3.Row]:
+        return self.db.execute(
+            "SELECT * FROM requests WHERE parent = ? ORDER BY created", (request_id,)
+        ).fetchall()
 
     def open_request(self, org: str, kind: str) -> sqlite3.Row | None:
         """A draft or sent request of this kind that has no answer yet."""

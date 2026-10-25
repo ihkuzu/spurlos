@@ -11,7 +11,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from . import census as census_mod
-from . import inbox, mailer, outbox, reply_eval
+from . import escalate, inbox, mailer, outbox, reply_eval
 from . import registry as registry_mod
 from . import triage as triage_mod
 from .demo import CONTACTS, ME, build_mbox
@@ -20,7 +20,7 @@ from .orgs import org_domain
 from .requests import is_reserved
 from .sources import ImapSource, read_eml_dir, read_mbox
 from .sources import raw_messages as read_raw
-from .vault import Vault
+from .vault import Vault, default_path
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -79,6 +79,8 @@ def _parser() -> argparse.ArgumentParser:
     pro.add_argument("--name")
     pro.add_argument("--email")
     pro.add_argument("--address", help="only used when a company requires it")
+    pro.add_argument("--state", help="German federal state for complaints, e.g. BY, BE, NW")
+    pro.add_argument("--country", help="two letters, default de")
 
     rq = sub.add_parser("request", help="GDPR requests: draft, send, track")
     rqs = rq.add_subparsers(dest="action", required=True)
@@ -111,9 +113,19 @@ def _parser() -> argparse.ArgumentParser:
     snd.add_argument(
         "--yes", action="store_true", help="skip the question; the mail is still shown"
     )
+    rem = rqs.add_parser("remind", help="draft a reminder for an overdue request")
+    rem.add_argument("id")
+    com = rqs.add_parser("complain", help="draft a complaint to your data protection authority")
+    com.add_argument("id")
+    com.add_argument("--why", default="", help="refused requests: why their reason does not hold")
     mk = rqs.add_parser("mark-sent", help="you sent it yourself; start the one-month clock")
     mk.add_argument("id")
     mk.add_argument("--date", type=date.fromisoformat, help="YYYY-MM-DD, default today")
+
+    sub.add_parser("todo", help="what needs doing now")
+    web = sub.add_parser("ui", help="open a local web page for the vault (127.0.0.1 only)")
+    web.add_argument("--port", type=int, default=8044)
+    web.add_argument("--no-browser", action="store_true")
 
     rp = sub.add_parser("replies", help="answers to your requests, read by the reply agent")
     rps = rp.add_subparsers(dest="action", required=True)
@@ -277,6 +289,18 @@ def _request(vault: Vault, args) -> int:
         for line in skipped:
             print(f"skipped {line}")
         return 0
+    if args.action in ("remind", "complain"):
+        try:
+            if args.action == "remind":
+                d = escalate.reminder(vault, args.id)
+            else:
+                d = escalate.complaint(vault, registry, args.id, why=args.why)
+        except ValueError as error:
+            print(error, file=sys.stderr)
+            return 1
+        _print_request(vault.request(d.id))
+        print(f"\ndraft {d.id} saved. Next: spurlos request send {d.id}")
+        return 0
     if args.action == "list":
         lines = outbox.status_lines(vault)
         print("\n".join(lines) if lines else "no requests yet")
@@ -408,6 +432,11 @@ def main(argv: list[str] | None = None) -> int:
         return _registry(args)
     if args.command == "eval-replies":
         return _eval(args)
+    if args.command == "ui":
+        from .ui import serve
+
+        serve(args.vault or default_path(), args.port, not args.no_browser)
+        return 0
     vault = Vault(args.vault)
     try:
         if args.command == "import":
@@ -431,8 +460,18 @@ def main(argv: list[str] | None = None) -> int:
             print(f"saved contact for {domain}")
         elif args.command == "triage":
             return _triage(vault, args)
+        elif args.command == "todo":
+            items = escalate.todo(vault)
+            if not items:
+                print("nothing to do right now")
+            for rid, what, command in items:
+                print(f"{rid}  {what}\n           {command}")
         elif args.command == "profile":
-            vault.set_profile(name=args.name, email=args.email, address=args.address)
+            vault.set_profile(
+                name=args.name, email=args.email, address=args.address,
+                state=args.state.upper() if args.state else None,
+                country=args.country.lower() if args.country else None,
+            )  # fmt: skip
             for key, value in vault.profile().items():
                 if not key.startswith("smtp"):
                     print(f"{key}: {value}")

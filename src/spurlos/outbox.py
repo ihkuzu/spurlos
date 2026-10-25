@@ -95,9 +95,14 @@ def from_triage(
 
 
 def mark_sent(vault: Vault, request_id: str, when: datetime | None = None, message_id=None):
+    from .escalate import due_after_sending
+
     when = when or datetime.now(timezone.utc)
-    due = req.due_date(when)
-    vault.mark_sent(request_id, when.isoformat(), due.isoformat(), message_id)
+    r = vault.request(request_id)
+    due = due_after_sending(r["kind"], when)
+    vault.mark_sent(r["id"], when.isoformat(), due.isoformat(), message_id)
+    if r["kind"] == "complaint" and r["parent"]:
+        vault.set_status(r["parent"], "complained")
     return due
 
 
@@ -111,5 +116,6 @@ def status_lines(vault: Vault, today: date | None = None) -> list[str]:
             state = f"sent {r['sent'][:10]}, " + (
                 f"OVERDUE by {-left} days" if left < 0 else f"answer due in {left} days"
             )
-        lines.append(f"{r['id']}  {r['kind']:9} {r['org']:30} {r['transport']:7} {state}")
+        about = f" (for {r['parent']})" if r["parent"] else ""
+        lines.append(f"{r['id']}  {r['kind']:9} {r['org']:30} {r['transport']:7} {state}{about}")
     return lines

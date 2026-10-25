@@ -7,9 +7,11 @@ spurlos finds them, asks them what they store about you and gets it deleted unde
 It runs on your own machine: no account, no server, no third party that you have to hand
 your data to so that it can be deleted.
 
-> Status: early. Reading your mailbox, finding the organisations behind it and their privacy
-> contacts, sending GDPR requests and reading the answers with a local agent works.
-> Escalation and reading the data exports follow, see [Roadmap](#roadmap).
+> Status: early. Reading your mailbox, finding the organisations behind it, sending GDPR
+> requests, reading the answers with a local agent, reminders, complaints and a local web page
+> work. Reading the data exports companies send back follows, see [Roadmap](#roadmap).
+
+![The local web page: organisations, suggested actions and request status](docs/ui-organisations.png)
 
 ## What it does today
 
@@ -186,6 +188,50 @@ person who wrote the rules, so the rules may look better here than on real mail.
 replies are few: one reply more or less is 2.5 points, so read the numbers as a ranking, not
 a precise score.
 
+## When they do not answer
+
+```
+spurlos todo
+SP-6FTG2B  apotheke-rosengarten.example refused
+           spurlos request complain SP-6FTG2B
+SP-TSZZJT  codecamp.example is overdue since 2026-10-10
+           spurlos request remind SP-TSZZJT
+SP-TXCAEL  erasure to pixelforum.example is not sent yet
+           spurlos request send SP-TXCAEL
+```
+
+- **Reminder.** `request remind ID` drafts a reminder once the month is over. It names the
+  date of your request and its reference, gives two weeks and quotes the original request.
+- **Complaint.** `request complain ID` drafts a complaint under Art. 77 GDPR for a request that
+  was refused or ignored. Art. 77 lets you complain where you live, so spurlos picks the
+  authority of your federal state (`spurlos profile --state BY` gives the Bavarian BayLDA)
+  or of your country. The facts are filled in: what you asked for, when, the deadline, the
+  reminder, their reason for refusing and, with `--why`, yours.
+- Both are drafts like any other request: you read them, then send them yourself.
+- An answer to a reminder or complaint updates the original request.
+
+## A local web page
+
+```
+spurlos ui
+```
+
+opens a page in your browser with the overview, the organisations and their suggested action,
+your requests with their deadlines and every reply with the agent's label, which you can
+correct there. You can draft requests, reminders and complaints, download a request as
+`.eml` and mark it as sent.
+
+- It listens on `127.0.0.1` only and every call needs a token that is created when it starts.
+- It loads nothing from the internet: no fonts, no scripts, no tracking. A strict
+  Content-Security-Policy enforces that.
+- It cannot send mail. Sending stays in the command line, where you see the full message
+  and type `yes`.
+- Text from companies is shown as text, never as HTML.
+
+| Overview | One request with its reply |
+|---|---|
+| ![Overview](docs/ui-overview.png) | ![Request](docs/ui-request.png) |
+
 ## Privacy by design
 
 - **Headers only.** Over IMAP, spurlos asks the server for five header fields
@@ -249,8 +295,8 @@ left out of the list.
    only after you confirm, with the one-month deadline tracked (done)
 4. A reply agent that matches answers to requests, labels them and sets the next step, with
    an eval of 40 example answers (done)
-5. Reminders after the one-month deadline and a complaint draft for the right data
-   protection authority
+5. Reminders after the one-month deadline, a complaint draft for the right data protection
+   authority and a local web page (done)
 6. Reading the data exports companies send back, so you can see who knows what about you
 7. Docs, demo and a first release
 

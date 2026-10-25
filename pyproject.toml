@@ -27,7 +27,7 @@ spurlos = "spurlos.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-spurlos = ["data/*.json.gz", "data/*.json"]
+spurlos = ["data/*.json.gz", "data/*.json", "web/*.html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

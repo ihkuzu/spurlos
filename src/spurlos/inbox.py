@@ -53,8 +53,13 @@ def process(vault: Vault, raws: Iterable[bytes], llm: LLM | None, apply: bool = 
         result = graph.invoke({"reply": reply})
         vault.add_reply(reply, result)
         decision = result.get("decision") or {}
-        if apply and result.get("request") and decision.get("status"):
-            vault.set_status(result["request"]["id"], decision["status"], decision.get("due"))
+        req = result.get("request")
+        if apply and req and decision.get("status"):
+            # an answer to a reminder or complaint settles the request it belongs to
+            target = req.get("parent") or req["id"]
+            vault.set_status(target, decision["status"], decision.get("due"))
+            if target != req["id"]:
+                vault.set_status(req["id"], "answered")
         results.append((reply, result))
     return results
 

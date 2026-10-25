@@ -1,0 +1,863 @@
+{
+ "rules": {
+  "summary": {
+   "correct": 31,
+   "total": 40,
+   "by_label": {
+    "confirmed": "4/5",
+    "data_provided": "4/5",
+    "no_data": "2/5",
+    "id_required": "3/5",
+    "extension": "4/5",
+    "refused": "4/5",
+    "acknowledged": "5/5",
+    "auto_reply": "5/5"
+   },
+   "by_lang": {
+    "de": "18/24",
+    "en": "13/16"
+   },
+   "mistakes": [
+    "no_data -> acknowledged: 2",
+    "id_required -> acknowledged: 2",
+    "confirmed -> acknowledged: 1",
+    "data_provided -> acknowledged: 1",
+    "no_data -> data_provided: 1",
+    "extension -> acknowledged: 1"
+   ],
+   "fallbacks": 0,
+   "retries": 0,
+   "seconds_per_reply": 0.0
+  },
+  "outcomes": [
+   {
+    "id": "r01",
+    "lang": "de",
+    "gold": "confirmed",
+    "label": "confirmed",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.005,
+    "ok": true
+   },
+   {
+    "id": "r02",
+    "lang": "de",
+    "gold": "confirmed",
+    "label": "confirmed",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r03",
+    "lang": "de",
+    "gold": "confirmed",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": false
+   },
+   {
+    "id": "r04",
+    "lang": "en",
+    "gold": "confirmed",
+    "label": "confirmed",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r05",
+    "lang": "en",
+    "gold": "confirmed",
+    "label": "confirmed",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r06",
+    "lang": "de",
+    "gold": "data_provided",
+    "label": "data_provided",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r07",
+    "lang": "en",
+    "gold": "data_provided",
+    "label": "data_provided",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r08",
+    "lang": "de",
+    "gold": "data_provided",
+    "label": "data_provided",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r09",
+    "lang": "en",
+    "gold": "data_provided",
+    "label": "data_provided",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r10",
+    "lang": "de",
+    "gold": "data_provided",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": false
+   },
+   {
+    "id": "r11",
+    "lang": "de",
+    "gold": "no_data",
+    "label": "no_data",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r12",
+    "lang": "en",
+    "gold": "no_data",
+    "label": "data_provided",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": false
+   },
+   {
+    "id": "r13",
+    "lang": "de",
+    "gold": "no_data",
+    "label": "no_data",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r14",
+    "lang": "en",
+    "gold": "no_data",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": false
+   },
+   {
+    "id": "r15",
+    "lang": "de",
+    "gold": "no_data",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": false
+   },
+   {
+    "id": "r16",
+    "lang": "de",
+    "gold": "id_required",
+    "label": "id_required",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r17",
+    "lang": "en",
+    "gold": "id_required",
+    "label": "id_required",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r18",
+    "lang": "de",
+    "gold": "id_required",
+    "label": "id_required",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r19",
+    "lang": "en",
+    "gold": "id_required",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": false
+   },
+   {
+    "id": "r20",
+    "lang": "de",
+    "gold": "id_required",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": false
+   },
+   {
+    "id": "r21",
+    "lang": "de",
+    "gold": "extension",
+    "label": "extension",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r22",
+    "lang": "en",
+    "gold": "extension",
+    "label": "extension",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r23",
+    "lang": "de",
+    "gold": "extension",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": false
+   },
+   {
+    "id": "r24",
+    "lang": "en",
+    "gold": "extension",
+    "label": "extension",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r25",
+    "lang": "de",
+    "gold": "extension",
+    "label": "extension",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r26",
+    "lang": "de",
+    "gold": "refused",
+    "label": "refused",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r27",
+    "lang": "en",
+    "gold": "refused",
+    "label": "refused",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r28",
+    "lang": "de",
+    "gold": "refused",
+    "label": "refused",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r29",
+    "lang": "en",
+    "gold": "refused",
+    "label": "refused",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r30",
+    "lang": "de",
+    "gold": "refused",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": false
+   },
+   {
+    "id": "r31",
+    "lang": "de",
+    "gold": "acknowledged",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r32",
+    "lang": "en",
+    "gold": "acknowledged",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r33",
+    "lang": "de",
+    "gold": "acknowledged",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r34",
+    "lang": "en",
+    "gold": "acknowledged",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r35",
+    "lang": "de",
+    "gold": "acknowledged",
+    "label": "acknowledged",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r36",
+    "lang": "de",
+    "gold": "auto_reply",
+    "label": "auto_reply",
+    "source": "header",
+    "tries": 0,
+    "seconds": 0.001,
+    "ok": true
+   },
+   {
+    "id": "r37",
+    "lang": "en",
+    "gold": "auto_reply",
+    "label": "auto_reply",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r38",
+    "lang": "de",
+    "gold": "auto_reply",
+    "label": "auto_reply",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.001,
+    "ok": true
+   },
+   {
+    "id": "r39",
+    "lang": "en",
+    "gold": "auto_reply",
+    "label": "auto_reply",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r40",
+    "lang": "de",
+    "gold": "auto_reply",
+    "label": "auto_reply",
+    "source": "rules",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   }
+  ]
+ },
+ "ollama:qwen2.5:7b": {
+  "summary": {
+   "correct": 39,
+   "total": 40,
+   "by_label": {
+    "confirmed": "5/5",
+    "data_provided": "5/5",
+    "no_data": "5/5",
+    "id_required": "5/5",
+    "extension": "5/5",
+    "refused": "5/5",
+    "acknowledged": "4/5",
+    "auto_reply": "5/5"
+   },
+   "by_lang": {
+    "de": "23/24",
+    "en": "16/16"
+   },
+   "mistakes": [
+    "acknowledged -> confirmed: 1"
+   ],
+   "fallbacks": 0,
+   "retries": 0,
+   "seconds_per_reply": 4.42
+  },
+  "outcomes": [
+   {
+    "id": "r01",
+    "lang": "de",
+    "gold": "confirmed",
+    "label": "confirmed",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 41.708,
+    "ok": true
+   },
+   {
+    "id": "r02",
+    "lang": "de",
+    "gold": "confirmed",
+    "label": "confirmed",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.485,
+    "ok": true
+   },
+   {
+    "id": "r03",
+    "lang": "de",
+    "gold": "confirmed",
+    "label": "confirmed",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.817,
+    "ok": true
+   },
+   {
+    "id": "r04",
+    "lang": "en",
+    "gold": "confirmed",
+    "label": "confirmed",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.554,
+    "ok": true
+   },
+   {
+    "id": "r05",
+    "lang": "en",
+    "gold": "confirmed",
+    "label": "confirmed",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.729,
+    "ok": true
+   },
+   {
+    "id": "r06",
+    "lang": "de",
+    "gold": "data_provided",
+    "label": "data_provided",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.714,
+    "ok": true
+   },
+   {
+    "id": "r07",
+    "lang": "en",
+    "gold": "data_provided",
+    "label": "data_provided",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.492,
+    "ok": true
+   },
+   {
+    "id": "r08",
+    "lang": "de",
+    "gold": "data_provided",
+    "label": "data_provided",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.624,
+    "ok": true
+   },
+   {
+    "id": "r09",
+    "lang": "en",
+    "gold": "data_provided",
+    "label": "data_provided",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.615,
+    "ok": true
+   },
+   {
+    "id": "r10",
+    "lang": "de",
+    "gold": "data_provided",
+    "label": "data_provided",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.404,
+    "ok": true
+   },
+   {
+    "id": "r11",
+    "lang": "de",
+    "gold": "no_data",
+    "label": "no_data",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.432,
+    "ok": true
+   },
+   {
+    "id": "r12",
+    "lang": "en",
+    "gold": "no_data",
+    "label": "no_data",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.299,
+    "ok": true
+   },
+   {
+    "id": "r13",
+    "lang": "de",
+    "gold": "no_data",
+    "label": "no_data",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.323,
+    "ok": true
+   },
+   {
+    "id": "r14",
+    "lang": "en",
+    "gold": "no_data",
+    "label": "no_data",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.521,
+    "ok": true
+   },
+   {
+    "id": "r15",
+    "lang": "de",
+    "gold": "no_data",
+    "label": "no_data",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.407,
+    "ok": true
+   },
+   {
+    "id": "r16",
+    "lang": "de",
+    "gold": "id_required",
+    "label": "id_required",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.875,
+    "ok": true
+   },
+   {
+    "id": "r17",
+    "lang": "en",
+    "gold": "id_required",
+    "label": "id_required",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.626,
+    "ok": true
+   },
+   {
+    "id": "r18",
+    "lang": "de",
+    "gold": "id_required",
+    "label": "id_required",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 4.448,
+    "ok": true
+   },
+   {
+    "id": "r19",
+    "lang": "en",
+    "gold": "id_required",
+    "label": "id_required",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.706,
+    "ok": true
+   },
+   {
+    "id": "r20",
+    "lang": "de",
+    "gold": "id_required",
+    "label": "id_required",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.865,
+    "ok": true
+   },
+   {
+    "id": "r21",
+    "lang": "de",
+    "gold": "extension",
+    "label": "extension",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.475,
+    "ok": true
+   },
+   {
+    "id": "r22",
+    "lang": "en",
+    "gold": "extension",
+    "label": "extension",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.441,
+    "ok": true
+   },
+   {
+    "id": "r23",
+    "lang": "de",
+    "gold": "extension",
+    "label": "extension",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.448,
+    "ok": true
+   },
+   {
+    "id": "r24",
+    "lang": "en",
+    "gold": "extension",
+    "label": "extension",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.369,
+    "ok": true
+   },
+   {
+    "id": "r25",
+    "lang": "de",
+    "gold": "extension",
+    "label": "extension",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.409,
+    "ok": true
+   },
+   {
+    "id": "r26",
+    "lang": "de",
+    "gold": "refused",
+    "label": "refused",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.394,
+    "ok": true
+   },
+   {
+    "id": "r27",
+    "lang": "en",
+    "gold": "refused",
+    "label": "refused",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.467,
+    "ok": true
+   },
+   {
+    "id": "r28",
+    "lang": "de",
+    "gold": "refused",
+    "label": "refused",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.398,
+    "ok": true
+   },
+   {
+    "id": "r29",
+    "lang": "en",
+    "gold": "refused",
+    "label": "refused",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.504,
+    "ok": true
+   },
+   {
+    "id": "r30",
+    "lang": "de",
+    "gold": "refused",
+    "label": "refused",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.561,
+    "ok": true
+   },
+   {
+    "id": "r31",
+    "lang": "de",
+    "gold": "acknowledged",
+    "label": "confirmed",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.466,
+    "ok": false
+   },
+   {
+    "id": "r32",
+    "lang": "en",
+    "gold": "acknowledged",
+    "label": "acknowledged",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.551,
+    "ok": true
+   },
+   {
+    "id": "r33",
+    "lang": "de",
+    "gold": "acknowledged",
+    "label": "acknowledged",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.472,
+    "ok": true
+   },
+   {
+    "id": "r34",
+    "lang": "en",
+    "gold": "acknowledged",
+    "label": "acknowledged",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.685,
+    "ok": true
+   },
+   {
+    "id": "r35",
+    "lang": "de",
+    "gold": "acknowledged",
+    "label": "acknowledged",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.524,
+    "ok": true
+   },
+   {
+    "id": "r36",
+    "lang": "de",
+    "gold": "auto_reply",
+    "label": "auto_reply",
+    "source": "header",
+    "tries": 0,
+    "seconds": 0.002,
+    "ok": true
+   },
+   {
+    "id": "r37",
+    "lang": "en",
+    "gold": "auto_reply",
+    "label": "auto_reply",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.472,
+    "ok": true
+   },
+   {
+    "id": "r38",
+    "lang": "de",
+    "gold": "auto_reply",
+    "label": "auto_reply",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.305,
+    "ok": true
+   },
+   {
+    "id": "r39",
+    "lang": "en",
+    "gold": "auto_reply",
+    "label": "auto_reply",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.42,
+    "ok": true
+   },
+   {
+    "id": "r40",
+    "lang": "de",
+    "gold": "auto_reply",
+    "label": "auto_reply",
+    "source": "ollama:qwen2.5:7b",
+    "tries": 1,
+    "seconds": 3.687,
+    "ok": true
+   }
+  ]
+ }
+}

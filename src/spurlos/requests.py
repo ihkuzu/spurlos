@@ -50,6 +50,7 @@ class Draft:
     transport: str
     subject: str
     body: str
+    parent: str | None = None
 
 
 def new_ref() -> str:
