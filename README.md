@@ -291,7 +291,7 @@ pip install "spurlos[mcp]"
 ```
 
 `spurlos mcp` starts an [MCP](https://modelcontextprotocol.io) server over stdio, so an MCP
-client such as Claude Desktop or a local agent can answer questions like "which forgotten
+client such as a desktop chat app, an IDE assistant or a local agent can answer questions like "which forgotten
 accounts should I delete first?" or "who has my bank details?" from your vault. Add it to
 the client's configuration:
 
