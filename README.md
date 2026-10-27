@@ -15,11 +15,12 @@ your data to so that it can be deleted.
 
 ## Demo
 
-![Demo: from a mailbox to requests, answers and a map of who holds your data](docs/demo.gif)
+![The local web page: overview, organisations, requests, replies and what companies know](docs/demo.gif)
 
-The demo uses made-up companies and a made-up person, so you can run the same thing yourself
-without touching your own mail: `spurlos demo`. The reply agent runs with its keyword rules
-here; a local model gives better labels but takes a few seconds per reply.
+Recorded with `spurlos ui` on made-up companies and a made-up person; run `spurlos demo` to get
+the same data without touching your own mail. Replies were labelled by the keyword rules here;
+a local model gives better labels but takes a few seconds per reply. Sending stays in the
+command line, where you see every letter and type `yes`.
 
 ## What it does today
 
@@ -239,8 +240,12 @@ correct there. You can draft requests, reminders and complaints, download a requ
 | Overview | Organisations |
 |---|---|
 | ![Overview](docs/ui-overview.png) | ![Organisations](docs/ui-organisations.png) |
-| **One request** | **What they know** |
-| ![Request](docs/ui-request.png) | ![What they know](docs/ui-known.png) |
+| **Requests and deadlines** | **One request** |
+| ![Requests](docs/ui-requests.png) | ![Request](docs/ui-request.png) |
+| **Replies, labelled by the agent** | **What they know** |
+| ![Replies](docs/ui-replies.png) | ![What they know](docs/ui-known.png) |
+
+It follows your system's light or dark setting.
 
 ## What they know about you
 
