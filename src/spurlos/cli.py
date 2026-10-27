@@ -126,6 +126,7 @@ def _parser() -> argparse.ArgumentParser:
     web = sub.add_parser("ui", help="open a local web page for the vault (127.0.0.1 only)")
     web.add_argument("--port", type=int, default=8044)
     web.add_argument("--no-browser", action="store_true")
+    web.add_argument("--host", default="127.0.0.1", help="0.0.0.0 only inside Docker")
 
     rp = sub.add_parser("replies", help="answers to your requests, read by the reply agent")
     rps = rp.add_subparsers(dest="action", required=True)
@@ -485,7 +486,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "ui":
         from .ui import serve
 
-        serve(args.vault or default_path(), args.port, not args.no_browser)
+        serve(args.vault or default_path(), args.port, not args.no_browser, args.host)
         return 0
     if args.command == "mcp":
         try:

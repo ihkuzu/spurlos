@@ -164,3 +164,19 @@ def test_ui_api_reads_and_acts_but_never_sends(server):
     assert call(base + "/api/send", body={"id": rid})[0] == 404
     assert call(base + "/api/draft", body={"domain": "shop.de"})[0] == 400
     assert call(base + "/api/relabel", body={"key": "x", "label": "pirate"})[0] == 400
+
+
+def test_ui_shows_what_they_know(server, tmp_path, registry):
+    base, rid = server
+    from spurlos.demo import build_export
+    from spurlos.exports import read
+
+    v = Vault(tmp_path / "v.db")
+    v.set_holdings("shop.de", rid, read(build_export(tmp_path / "e.zip")).found.values())
+    v.close()
+    data = json.loads(call(base + "/api/holdings")[1])
+    assert data["labels"]["payment"] == "bank and card details"
+    assert {"org": "shop.de", "category": "payment", "field": "payment.iban"}.items() <= next(
+        r for r in data["rows"] if r["field"] == "payment.iban"
+    ).items()
+    assert "3704" not in json.dumps(data)

@@ -31,3 +31,14 @@ jobs:
       - run: spurlos --vault demo.db todo
       - run: spurlos --vault demo.db export import brotkorb-shop.example demo-export.zip
       - run: spurlos --vault demo.db map
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t spurlos .
+      - run: mkdir -m 777 vault
+      - run: docker run --rm -v "$PWD/vault:/data" spurlos demo --path /data/demo.mbox
+      - run: docker run --rm -v "$PWD/vault:/data" spurlos census
+      - run: docker run --rm -v "$PWD/vault:/data" spurlos export import brotkorb-shop.example /data/demo-export.zip
+      - run: docker run --rm -v "$PWD/vault:/data" spurlos map

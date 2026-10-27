@@ -12,7 +12,7 @@ from importlib import resources
 from urllib.parse import parse_qs, urlparse
 
 from . import census as census_mod
-from . import escalate, mailer, outbox
+from . import escalate, exports, mailer, outbox
 from . import triage as triage_mod
 from .agent import decide
 from .registry import Registry
@@ -86,6 +86,13 @@ class Api:
         for row in rows:
             row.pop("body")
         return rows
+
+    def holdings(self, v: Vault) -> dict:
+        rows = [
+            {k: r[k] for k in ("org", "category", "field", "count", "example", "request_id")}
+            for r in v.holdings()
+        ]
+        return {"labels": exports.LABELS, "rows": rows}
 
     ACTIONS = ("draft", "mark-sent", "remind", "complain", "delete", "relabel")
 
@@ -185,6 +192,8 @@ def make_handler(api: Api, token: str, port: int):
                     return self._json(HTTPStatus.OK, api.triage(v))
                 if path == "/api/requests":
                     return self._json(HTTPStatus.OK, api.requests(v))
+                if path == "/api/holdings":
+                    return self._json(HTTPStatus.OK, api.holdings(v))
                 if path == "/api/replies":
                     return self._json(HTTPStatus.OK, api.replies(v))
                 if path.startswith("/api/request/"):
@@ -230,12 +239,17 @@ def make_handler(api: Api, token: str, port: int):
     return Handler
 
 
-def serve(vault_path, port: int = 8044, open_browser: bool = True) -> None:
+def serve(vault_path, port: int = 8044, open_browser: bool = True, host: str = "127.0.0.1") -> None:
     token = secrets.token_urlsafe(16)
     api = Api(vault_path, Registry.load())
-    server = HTTPServer(("127.0.0.1", port), make_handler(api, token, port))
+    server = HTTPServer((host, port), make_handler(api, token, port))
     url = f"http://127.0.0.1:{port}/?t={token}"
-    print(f"spurlos is open at {url}\nonly this computer can reach it; press Ctrl+C to stop")
+    print(f"spurlos is open at {url}", flush=True)
+    if host in ("127.0.0.1", "localhost"):
+        print("only this computer can reach it; press Ctrl+C to stop", flush=True)
+    else:
+        # inside Docker: the port must still be published to 127.0.0.1 only
+        print(f"listening on {host}; publish the port with -p 127.0.0.1:{port}:{port}", flush=True)
     if open_browser:
         webbrowser.open(url)
     try:

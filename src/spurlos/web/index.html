@@ -72,6 +72,9 @@ button.act:disabled { opacity: .45; cursor: default; }
 #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--ink);
   color: var(--paper); padding: 9px 16px; border-radius: 8px; font-size: 14px; opacity: 0; transition: opacity .2s; }
 #toast.show { opacity: 1; }
+.grid td.n { text-align: center; font-variant-numeric: tabular-nums; }
+.grid td.n.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.grid td.n.on.sens { background: var(--warn-soft); color: var(--warn); }
 .empty { padding: 30px; text-align: center; color: var(--soft); background: var(--card);
   border: 1px dashed var(--line); border-radius: 10px; }
 @media (max-width: 760px) {
@@ -91,6 +94,7 @@ button.act:disabled { opacity: .45; cursor: default; }
   <button data-tab="orgs">Organisations</button>
   <button data-tab="requests">Requests</button>
   <button data-tab="replies">Replies</button>
+  <button data-tab="known">What they know</button>
 </nav>
 <main id="view"></main>
 <aside class="drawer" id="drawer"></aside>
@@ -262,7 +266,33 @@ async function replies() {
   view.querySelectorAll("tr.click").forEach((tr) => tr.addEventListener("click", () => tr.dataset.id && openRequest(tr.dataset.id)));
 }
 
-const pages = {overview, orgs, requests, replies};
+async function known() {
+  const {labels, rows} = await api("/api/holdings");
+  if (!rows.length) {
+    view.innerHTML = `<div class="empty">No data exports read yet. When a company sends you your data, run <code>spurlos export import DOMAIN FILE</code>.</div>`;
+    return;
+  }
+  const cats = Object.keys(labels).filter((c) => rows.some((r) => r.category === c));
+  const orgs = [...new Set(rows.map((r) => r.org))];
+  const sens = new Set(["payment", "health", "location", "profiling"]);
+  const count = (o, c) => rows.filter((r) => r.org === o && r.category === c).length;
+  view.innerHTML = `<p class="muted">What each company's data export contained. Numbers are fields per kind of data; only field names and masked examples are kept.</p>
+    <table class="grid"><tr><th>Organisation</th>${cats.map((c) => `<th title="${esc(labels[c])}">${esc(c)}</th>`).join("")}</tr>
+    ${orgs.map((o) => `<tr class="click" data-org="${esc(o)}"><td>${esc(o)}</td>${cats.map((c) => {
+      const n = count(o, c);
+      return `<td class="n${n ? " on" : ""}${n && sens.has(c) ? " sens" : ""}">${n || ""}</td>`;
+    }).join("")}</tr>`).join("")}</table><div id="fields"></div>`;
+  const fields = (o) => {
+    document.getElementById("fields").innerHTML = `<h2>${esc(o)}</h2><table>
+      <tr><th>Kind</th><th>Field</th><th>Count</th><th>Example</th></tr>
+      ${rows.filter((r) => r.org === o).map((r) => `<tr><td><span class="chip">${esc(labels[r.category] || r.category)}</span></td>
+        <td><code>${esc(r.field)}</code></td><td class="muted">${r.count}</td><td class="muted">${esc(r.example)}</td></tr>`).join("")}</table>`;
+  };
+  view.querySelectorAll("tr.click").forEach((tr) => tr.addEventListener("click", () => fields(tr.dataset.org)));
+  fields(orgs[0]);
+}
+
+const pages = {overview, orgs, requests, replies, known};
 async function show(tab) {
   document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === tab));
   const fresh = view.cloneNode(false);
