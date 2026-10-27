@@ -11,10 +11,10 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 
 from . import census as census_mod
-from . import escalate, inbox, mailer, outbox, reply_eval
+from . import escalate, exports, inbox, mailer, outbox, reply_eval
 from . import registry as registry_mod
 from . import triage as triage_mod
-from .demo import CONTACTS, ME, build_mbox
+from .demo import CONTACTS, ME, build_export, build_mbox
 from .llm import OllamaLLM
 from .orgs import org_domain
 from .requests import is_reserved
@@ -155,6 +155,21 @@ def _parser() -> argparse.ArgumentParser:
     ev.add_argument("--model", help="Ollama model, default $SPURLOS_MODEL or llama3.2:3b")
     ev.add_argument("--cases", help="another JSON file with cases")
     ev.add_argument("--out", help="write all outcomes as JSON")
+
+    ex = sub.add_parser("export", help="data a company sent you: what kinds of data it holds")
+    exs = ex.add_subparsers(dest="action", required=True)
+    eimp = exs.add_parser("import", help="read a zip, folder or file they sent you")
+    eimp.add_argument("domain")
+    eimp.add_argument("path")
+    eimp.add_argument(
+        "--request", help="the access request this answers, found by itself if left out"
+    )
+    eimp.add_argument("--dry-run", action="store_true", help="only show, keep nothing")
+    exs.add_parser("show", help="what one organisation holds").add_argument("domain")
+    mp = sub.add_parser("map", help="who holds which kinds of your data")
+    mp.add_argument("--category", choices=list(exports.LABELS))
+    mp.add_argument("--json", action="store_true")
+    sub.add_parser("mcp", help="let an AI assistant read the vault over MCP (stdio, read-only)")
 
     demo = sub.add_parser("demo", help="write a made-up mailbox and import it")
     demo.add_argument("--path", default="data/demo.mbox")
@@ -384,6 +399,41 @@ def _imap_replies(vault: Vault, args):
     return raws
 
 
+def _export(vault: Vault, args) -> int:
+    domain = org_domain(args.domain)
+    if args.action == "show":
+        rows = vault.holdings(domain)
+        if not rows:
+            print(f"nothing read from {domain} yet")
+            return 1
+        for r in rows:
+            example = f"  e.g. {r['example']}" if r["example"] else ""
+            print(f"{r['category']:<10} {r['field']:<40} {r['count']:>6}x{example}")
+        return 0
+    try:
+        result = exports.read(args.path)
+    except ValueError as error:
+        print(f"could not read {args.path}: {error}", file=sys.stderr)
+        return 2
+    print(exports.format_result(domain, result))
+    if args.dry_run:
+        return 0
+    req = vault.request(args.request) if args.request else None
+    if args.request and (req is None or req["org"] != domain):
+        print(f"{args.request} is not a request to {domain}", file=sys.stderr)
+        return 2
+    if req is None:
+        asked = [r for r in vault.requests() if r["org"] == domain and r["kind"] == "access"
+                 and r["status"] not in ("draft",)]  # fmt: skip
+        req = asked[-1] if asked else None
+    vault.set_holdings(domain, req["id"] if req else None, result.found.values())
+    if req and req["status"] in ("sent", "answered"):
+        vault.set_status(req["id"], "done")
+        print(f"\n{req['id']} is answered with data and marked done")
+    print(f"saved to the vault: field names and masked examples only ({vault.path})")
+    return 0
+
+
 def _eval(args) -> int:
     cases = reply_eval.load_cases(args.cases)
     runs = {"rules": reply_eval.run(cases)}
@@ -437,6 +487,18 @@ def main(argv: list[str] | None = None) -> int:
 
         serve(args.vault or default_path(), args.port, not args.no_browser)
         return 0
+    if args.command == "mcp":
+        try:
+            from .mcp_server import build_server
+        except ImportError:
+            print("the MCP server needs: pip install 'spurlos[mcp]'", file=sys.stderr)
+            return 2
+        build_server(args.vault or default_path()).run()
+        return 0
+    for stream in (sys.stdout, sys.stderr):
+        # Windows consoles may not have • or …; print a ? rather than crash
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(errors="replace")
     vault = Vault(args.vault)
     try:
         if args.command == "import":
@@ -479,6 +541,14 @@ def main(argv: list[str] | None = None) -> int:
             return _request(vault, args)
         elif args.command == "replies":
             return _replies(vault, args)
+        elif args.command == "export":
+            return _export(vault, args)
+        elif args.command == "map":
+            rows = vault.holdings(category=args.category)
+            if args.json:
+                print(json.dumps([dict(r) for r in rows], ensure_ascii=False, indent=2))
+            else:
+                print(exports.format_map(rows, args.category))
         elif args.command == "demo":
             n = build_mbox(args.path)
             vault.add_me(ME)
@@ -487,6 +557,8 @@ def main(argv: list[str] | None = None) -> int:
                 vault.set_contact(domain, email=email)
             added, _ = vault.add(read_mbox(args.path))
             print(f"wrote {n} demo messages to {args.path}, {added} imported into {vault.path}")
+            export = build_export(Path(args.path).with_name("demo-export.zip"))
+            print(f"also wrote a made-up data export from brotkorb-shop.example to {export}")
             print("now run: spurlos census, then spurlos triage")
     except FileNotFoundError as exc:
         print(f"not found: {exc.filename}", file=sys.stderr)

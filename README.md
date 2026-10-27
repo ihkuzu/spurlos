@@ -8,8 +8,8 @@ It runs on your own machine: no account, no server, no third party that you have
 your data to so that it can be deleted.
 
 > Status: early. Reading your mailbox, finding the organisations behind it, sending GDPR
-> requests, reading the answers with a local agent, reminders, complaints and a local web page
-> work. Reading the data exports companies send back follows, see [Roadmap](#roadmap).
+> requests, reading the answers with a local agent, reminders, complaints, a local web page,
+> reading the data companies send back and an MCP server work. See [Roadmap](#roadmap).
 
 ![The local web page: organisations, suggested actions and request status](docs/ui-organisations.png)
 
@@ -232,6 +232,79 @@ correct there. You can draft requests, reminders and complaints, download a requ
 |---|---|
 | ![Overview](docs/ui-overview.png) | ![Request](docs/ui-request.png) |
 
+## What they know about you
+
+When a company answers an access request, it sends you your data: a zip with JSON and CSV
+files, a PDF letter or a plain text mail. spurlos reads it and notes what kinds of data it
+contains.
+
+```
+$ spurlos export import brotkorb-shop.example data/demo-export.zip
+brotkorb-shop.example: 3 files read, 20 kinds of fields
+
+  bank and card details (payment)
+    payment.iban                                1x  e.g. DE•• •••• •••• •••• •••• 00
+  what you bought (purchases)
+    product                                    14x  e.g. Ro… (10 chars)
+  where you are or were (location)
+    ip address                                  9x  e.g. •••.•.•.10
+  ...
+
+$ spurlos map
+organisation                   payment purchases  location   contact  identity    device profiling  activity
+brotkorb-shop.example                2         4         1         5         3         2         2         1
+
+$ spurlos map --category location
+who holds where you are or were:
+  brotkorb-shop.example        ip address
+```
+
+- Field names are sorted into eleven kinds of data (who you are, contact, location, payment,
+  purchases, devices, activity, messages, profiling, health, other) by the words in them,
+  in German and English. Values that look like an IBAN, an email address, a phone number
+  or an IP address are found in text and PDFs too.
+- If you sent that company an access request, it is marked done.
+- Only the field name, how often it appears and a masked example go into the vault. The
+  export itself is read in memory and never unpacked or copied.
+- Zips are checked before reading: at most 5,000 files, 50 MB per file and 500 MB in total,
+  and a file that is bigger than its zip header says is refused.
+- PDFs need `pip install "spurlos[pdf]"`. Scanned PDFs without a text layer are not read.
+
+The sorting goes by words, so it gets things wrong: a field called `title` can be a film you
+watched or your salutation. Use the map as a starting point and look into the export for
+anything that matters.
+
+## Ask your AI assistant (MCP)
+
+```
+pip install "spurlos[mcp]"
+```
+
+`spurlos mcp` starts an [MCP](https://modelcontextprotocol.io) server over stdio, so an MCP
+client such as Claude Desktop or a local agent can answer questions like "which forgotten
+accounts should I delete first?" or "who has my bank details?" from your vault. Add it to
+the client's configuration:
+
+```json
+{
+  "mcpServers": {
+    "spurlos": { "command": "spurlos", "args": ["mcp"] }
+  }
+}
+```
+
+It has seven tools: `overview`, `list_organisations`, `organisation`, `list_requests`,
+`get_request`, `todo` and `who_holds`.
+
+- The vault is opened read-only (SQLite `mode=ro` and `query_only`); a test checks that the
+  file is byte for byte the same after every tool has run.
+- It cannot send mail or change anything. To act, the assistant tells you which `spurlos`
+  command to run.
+- Mail subjects and the text of replies are not available through it. Organisation names,
+  request statuses, the agent's one-line summaries and the masked examples are.
+- What the tools return goes to whatever model your client uses. With a cloud model, that
+  information leaves your machine. With a local model, it does not.
+
 ## Privacy by design
 
 - **Headers only.** Over IMAP, spurlos asks the server for five header fields
@@ -297,7 +370,8 @@ left out of the list.
    an eval of 40 example answers (done)
 5. Reminders after the one-month deadline, a complaint draft for the right data protection
    authority and a local web page (done)
-6. Reading the data exports companies send back, so you can see who knows what about you
+6. Reading the data exports companies send back, so you can see who knows what about you,
+   and a read-only MCP server for AI assistants (done)
 7. Docs, demo and a first release
 
 ## Not legal advice

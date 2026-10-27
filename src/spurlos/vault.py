@@ -69,6 +69,17 @@ CREATE TABLE IF NOT EXISTS replies (
     next_step TEXT,
     created TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS holdings (
+    org TEXT NOT NULL,
+    request_id TEXT,
+    category TEXT NOT NULL,
+    field TEXT NOT NULL,
+    count INTEGER NOT NULL,
+    example TEXT NOT NULL,
+    file TEXT NOT NULL,
+    updated TEXT NOT NULL,
+    PRIMARY KEY (org, category, field)
+);
 """
 
 
@@ -79,8 +90,16 @@ def default_path() -> Path:
 
 
 class Vault:
-    def __init__(self, path: str | Path | None = None):
+    def __init__(self, path: str | Path | None = None, readonly: bool = False):
         self.path = Path(path) if path else default_path()
+        self.readonly = readonly
+        if readonly:
+            if not self.path.exists():
+                raise FileNotFoundError(2, "no vault yet", str(self.path))
+            self.db = sqlite3.connect(f"{self.path.resolve().as_uri()}?mode=ro", uri=True)
+            self.db.row_factory = sqlite3.Row
+            self.db.execute("PRAGMA query_only = ON")
+            return
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.db = sqlite3.connect(self.path)
         self.db.row_factory = sqlite3.Row
@@ -144,6 +163,8 @@ class Vault:
         return (row[0], row[1]) if row else None
 
     def set_category(self, org: str, category: str, source: str) -> None:
+        if self.readonly:
+            return
         self.db.execute(
             "INSERT OR REPLACE INTO org_info VALUES (?,?,?,datetime('now'))",
             (org, category, source),
@@ -284,6 +305,27 @@ class Vault:
         )
         self.db.commit()
         return bool(cur.rowcount)
+
+    def set_holdings(self, org: str, request_id: str | None, found) -> None:
+        """Replace what is known about one organisation with a freshly read export."""
+        self.db.execute("DELETE FROM holdings WHERE org = ?", (org,))
+        self.db.executemany(
+            "INSERT INTO holdings VALUES (?,?,?,?,?,?,?,datetime('now'))",
+            [(org, request_id, f.category, f.field, f.count, f.example, f.file) for f in found],
+        )
+        self.db.commit()
+
+    def holdings(self, org: str | None = None, category: str | None = None) -> list[sqlite3.Row]:
+        sql, args = "SELECT * FROM holdings WHERE 1=1", []
+        if org:
+            sql, args = sql + " AND org = ?", [*args, org]
+        if category:
+            sql, args = sql + " AND category = ?", [*args, category]
+        try:
+            return self.db.execute(sql + " ORDER BY org, category, count DESC", args).fetchall()
+        except sqlite3.OperationalError:
+            # a read-only vault from before exports existed
+            return []
 
     def count(self) -> int:
         return self.db.execute("SELECT COUNT(*) FROM messages").fetchone()[0]

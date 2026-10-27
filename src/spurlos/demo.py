@@ -155,3 +155,31 @@ def build_mbox(path: str | Path, seed: int = 7, now: datetime | None = None) -> 
     box.flush()
     box.close()
     return count
+
+
+def build_export(path: str | Path) -> Path:
+    """A made-up Art. 15 answer from the demo shop, as a zip like the ones companies send."""
+    import json
+    import zipfile
+
+    account = {
+        "customer": {"firstName": "Max", "lastName": "Mustermann", "birthDate": "1990-05-12",
+                     "email": ME, "phone": "+49 9131 123456"},
+        "addresses": [{"street": "Musterweg 1", "zip": "91052", "city": "Erlangen"}],
+        "payment": {"iban": "DE89 3704 0044 0532 0130 00", "method": "SEPA"},
+        "devices": [{"userAgent": "Mozilla/5.0 (Android 14)", "deviceId": "a81f-22c9"}],
+        "marketing": {"segments": ["family", "organic food"], "affinityScore": 0.82},
+    }  # fmt: skip
+    orders = "order_id;date;product;price\n" + "\n".join(
+        f"B-{1000 + i};2025-0{1 + i % 9}-1{i % 9};Roggenbrot;3.{i}0" for i in range(14)
+    )
+    logins = "\n".join(
+        f"2026-0{1 + i % 9}-0{1 + i % 9} login from 192.0.2.{10 + i}" for i in range(9)
+    )
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(path, "w") as zf:
+        zf.writestr("account.json", json.dumps(account, indent=2))
+        zf.writestr("orders.csv", orders)
+        zf.writestr("logins.txt", logins)
+    return path

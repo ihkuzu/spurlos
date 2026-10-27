@@ -29,3 +29,5 @@ jobs:
       - run: spurlos --vault demo.db request list
       - run: spurlos eval-replies
       - run: spurlos --vault demo.db todo
+      - run: spurlos --vault demo.db export import brotkorb-shop.example demo-export.zip
+      - run: spurlos --vault demo.db map
