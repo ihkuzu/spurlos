@@ -10,8 +10,8 @@ import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from . import __version__, escalate, exports, inbox, mailer, outbox, reply_eval
 from . import census as census_mod
-from . import escalate, exports, inbox, mailer, outbox, reply_eval
 from . import registry as registry_mod
 from . import triage as triage_mod
 from .demo import CONTACTS, ME, build_export, build_mbox
@@ -26,6 +26,7 @@ from .vault import Vault, default_path
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="spurlos", description=__doc__)
     parser.add_argument("--vault", help="SQLite file, default ~/.spurlos/vault.db or $SPURLOS_HOME")
+    parser.add_argument("--version", action="version", version=f"spurlos {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
     imp = sub.add_parser("import", help="read message headers into the vault")

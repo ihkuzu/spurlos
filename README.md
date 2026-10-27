@@ -7,11 +7,19 @@ spurlos finds them, asks them what they store about you and gets it deleted unde
 It runs on your own machine: no account, no server, no third party that you have to hand
 your data to so that it can be deleted.
 
-> Status: early. Reading your mailbox, finding the organisations behind it, sending GDPR
-> requests, reading the answers with a local agent, reminders, complaints, a local web page,
-> reading the data companies send back and an MCP server work. See [Roadmap](#roadmap).
+[![ci](https://github.com/ihkuzu/spurlos/actions/workflows/ci.yml/badge.svg)](https://github.com/ihkuzu/spurlos/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/ihkuzu/spurlos)](https://github.com/ihkuzu/spurlos/releases)
 
-![The local web page: organisations, suggested actions and request status](docs/ui-organisations.png)
+> Version 0.1. Everything below works and is tested on Linux and Windows. It has not been used
+> on many real mailboxes yet, so expect rough edges and please open an issue when you hit one.
+
+## Demo
+
+![Demo: from a mailbox to requests, answers and a map of who holds your data](docs/demo.gif)
+
+The demo uses made-up companies and a made-up person, so you can run the same thing yourself
+without touching your own mail: `spurlos demo`. The reply agent runs with its keyword rules
+here; a local model gives better labels but takes a few seconds per reply.
 
 ## What it does today
 
@@ -228,9 +236,11 @@ correct there. You can draft requests, reminders and complaints, download a requ
   and type `yes`.
 - Text from companies is shown as text, never as HTML.
 
-| Overview | One request with its reply |
+| Overview | Organisations |
 |---|---|
-| ![Overview](docs/ui-overview.png) | ![Request](docs/ui-request.png) |
+| ![Overview](docs/ui-overview.png) | ![Organisations](docs/ui-organisations.png) |
+| **One request** | **What they know** |
+| ![Request](docs/ui-request.png) | ![What they know](docs/ui-known.png) |
 
 ## What they know about you
 
@@ -325,7 +335,22 @@ It has seven tools: `overview`, `list_organisations`, `organisation`, `list_requ
 pip install git+https://github.com/ihkuzu/spurlos.git
 ```
 
-Python 3.10 or newer. Works on Linux, macOS and Windows.
+Python 3.10 or newer. Works on Linux, macOS and Windows. For the MCP server and PDF exports:
+`pip install "spurlos[mcp,pdf] @ git+https://github.com/ihkuzu/spurlos.git"`.
+
+**With Docker.** The vault lives in a folder you mount, so nothing is lost when the container
+goes away:
+
+```
+docker build -t spurlos https://github.com/ihkuzu/spurlos.git
+docker run --rm -v "$HOME/.spurlos:/data" spurlos demo --path /data/demo.mbox
+docker run --rm -v "$HOME/.spurlos:/data" spurlos census
+docker run --rm -v "$HOME/.spurlos:/data" -p 127.0.0.1:8044:8044 spurlos ui --host 0.0.0.0 --no-browser
+```
+
+Publish the web page to `127.0.0.1` only, as above. To use a local model from the container,
+add `-e OLLAMA_HOST=http://host.docker.internal:11434` (on Linux also
+`--add-host=host.docker.internal:host-gateway`).
 
 ## Use it on your mail
 
@@ -372,7 +397,10 @@ left out of the list.
    authority and a local web page (done)
 6. Reading the data exports companies send back, so you can see who knows what about you,
    and a read-only MCP server for AI assistants (done)
-7. Docs, demo and a first release
+7. Demo, Docker and a first release, 0.1 (done)
+
+Next: real replies from real companies to measure the agent on, more templates (portability,
+correction) and a guided first run for people who never used a terminal.
 
 ## Not legal advice
 

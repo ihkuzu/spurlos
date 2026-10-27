@@ -61,9 +61,9 @@ button.act { white-space: nowrap; font: inherit; font-size: 13px; padding: 5px 1
 button.act.ghost { background: none; color: var(--accent); }
 button.act:disabled { opacity: .45; cursor: default; }
 .drawer { position: fixed; inset: 0 0 0 auto; width: min(640px, 100%); background: var(--card);
-  border-left: 1px solid var(--line); box-shadow: -12px 0 40px rgba(0,0,0,.12); padding: 24px 26px;
+  border-left: 1px solid var(--line); padding: 24px 26px;
   overflow: auto; transform: translateX(100%); transition: transform .2s ease; }
-.drawer.open { transform: none; }
+.drawer.open { transform: none; box-shadow: -12px 0 40px rgba(0,0,0,.12); }
 .drawer pre { white-space: pre-wrap; font: 13px/1.5 var(--mono); background: var(--paper);
   border: 1px solid var(--line); border-radius: 8px; padding: 12px; max-height: 360px; overflow: auto; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 12px 0; }
